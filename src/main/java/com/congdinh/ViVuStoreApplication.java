@@ -1,265 +1,357 @@
 package com.congdinh;
 
 import java.io.IOException;
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import com.congdinh.models.Product;
+import com.congdinh.repositories.ProductRepository;
 
+import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.RequestDispatcher;
 
+/**
+ * Main Servlet Application for ViVu Store
+ */
 public class ViVuStoreApplication extends HttpServlet {
-    // private List<Product> productList; // We will fetch this from DB
-
-    // --- Database Connection Details (Replace with your actual details) ---
-    private static final String DB_URL = "jdbc:sqlserver://localhost:1433;databaseName=javaWebEvolution_dev;encrypt=true;trustServerCertificate=true;";
-    private static final String DB_USER = "sa";
-    private static final String DB_PASSWORD = "abcd@1234";
-    // --- End Database Connection Details ---
-
+    private static final long serialVersionUID = 1L;
+    
+    private ProductRepository productRepository;
+    
     @Override
     public void init() throws ServletException {
-        // JDBC drivers are typically auto-loaded (JDBC 4.0+).
-        // Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver") is usually not
-        // needed.
-        // If you encounter issues, you might need to uncomment the Class.forName call
-        // and ensure the driver JAR is correctly placed in your server's lib directory
-        // or defined as a provided dependency if your server manages it.
-        try {
-            Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
-            System.out.println("[ViVuStoreApplication] init: SQL Server JDBC Driver loaded successfully via Class.forName().");
-        } catch (ClassNotFoundException e) {
-            System.err.println("[ViVuStoreApplication] init: ERROR - SQL Server JDBC Driver not found via Class.forName()!");
-            e.printStackTrace(System.err);
-            throw new ServletException("SQL Server JDBC Driver not found", e);
-        }
+        // Initialize the Product Repository
+        productRepository = new ProductRepository();
+        
         // Create the Products table if it does not exist
-        try {
-            createProductsTable();
-        } catch (ServletException e) {
-            System.err.println("[ViVuStoreApplication] init: Error creating Products table.");
-            e.printStackTrace(System.err);
-        }
-
+        productRepository.createProductsTableIfNotExists();
         System.out.println("[ViVuStoreApplication] init: Products table checked/created.");
         
         // Optionally, initialize sample data if the table is empty
-        try {
-            initializeSampleData();
-        } catch (ServletException e) {
-            System.err.println("[ViVuStoreApplication] init: Error initializing sample data.");
-            e.printStackTrace(System.err);
-        }
+        productRepository.initializeSampleData();
+        System.out.println("[ViVuStoreApplication] init: Sample data initialization checked.");
     }
-
-    private void createProductsTable() throws ServletException {
-        String createTableSQL = 
-            "IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[Products]') AND type in (N'U')) " +
-            "BEGIN " +
-            "    CREATE TABLE [dbo].[Products] ( " +
-            "        Id INT PRIMARY KEY IDENTITY(1,1), " +
-            "        Name NVARCHAR(100) NOT NULL, " +
-            "        UnitPrice DECIMAL(10, 2) NOT NULL, " +
-            "        UnitInStock INT NOT NULL, " +
-            "        ThumbnailUrl NVARCHAR(255) NOT NULL " +
-            "    ); " +
-            "END;";
-
-        try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
-             Statement stmt = conn.createStatement()) {
-            
-            stmt.executeUpdate(createTableSQL);
-            System.out.println("[ViVuStoreApplication] createProductsTable: Products table checked/created successfully.");
-        } catch (SQLException e) {
-            System.err.println("[ViVuStoreApplication] createProductsTable: SQL EXCEPTION during table creation/check!");
-            e.printStackTrace(System.err);
-            throw new ServletException("Error creating/checking Products table.", e);
-        }
-    }
-
-    private List<Product> getProductsFromDB() throws ServletException {
-        List<Product> products = new ArrayList<>();
-        Connection conn = null;
-        PreparedStatement pstmt = null;
-        ResultSet rs = null;
-
-        try {
-            System.out.println("[ViVuStoreApplication] getProductsFromDB: Attempting to connect to database...");
-            conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
-            System.out.println("[ViVuStoreApplication] getProductsFromDB: Database connection successful.");
-
-            // Debug: Check if the Products table exists
-            DatabaseMetaData dbm = conn.getMetaData();
-            ResultSet tables = dbm.getTables(null, null, "Products", null);
-            if (tables.next()) {
-                System.out.println("[ViVuStoreApplication] getProductsFromDB: Products table exists in the database.");
-            } else {
-                System.out.println("[ViVuStoreApplication] getProductsFromDB: WARNING - Products table does NOT exist in the database!");
-                
-                // Try to create the table again, just in case
-                createProductsTable();
-                
-                // Check if we can find table with explicit schema
-                tables = dbm.getTables(null, "dbo", "Products", null);
-                if (tables.next()) {
-                    System.out.println("[ViVuStoreApplication] getProductsFromDB: Products table exists in the dbo schema.");
-                } else {
-                    System.out.println("[ViVuStoreApplication] getProductsFromDB: WARNING - Products table does NOT exist in the dbo schema either!");
-                }
-            }
-
-            // Use fully qualified table name in query
-            String sql = "SELECT Id, Name, UnitPrice, UnitInStock, ThumbnailUrl FROM [dbo].[Products]";
-            pstmt = conn.prepareStatement(sql);
-            rs = pstmt.executeQuery();
-
-            System.out.println("[ViVuStoreApplication] getProductsFromDB: Executed query. Processing results...");
-            while (rs.next()) {
-                int id = rs.getInt("Id");
-                String name = rs.getString("Name");
-                double unitPrice = rs.getDouble("UnitPrice");
-                int unitInStock = rs.getInt("UnitInStock");
-                String thumbnailUrl = rs.getString("ThumbnailUrl");
-                products.add(new Product(id, name, unitPrice, unitInStock, thumbnailUrl));
-            }
-            System.out.println("[ViVuStoreApplication] getProductsFromDB: Found " + products.size() + " products.");
-
-        } catch (SQLException e) {
-            System.err.println("[ViVuStoreApplication] getProductsFromDB: SQL EXCEPTION!");
-            e.printStackTrace(System.err);
-            throw new ServletException("Error fetching products from database.", e);
-        } finally {
-            try {
-                if (rs != null)
-                    rs.close();
-                if (pstmt != null)
-                    pstmt.close();
-                if (conn != null)
-                    conn.close();
-                System.out.println("[ViVuStoreApplication] getProductsFromDB: Database resources closed.");
-            } catch (SQLException e) {
-                System.err.println("[ViVuStoreApplication] getProductsFromDB: ERROR closing database resources!");
-                e.printStackTrace(System.err);
-            }
-        }
-        return products;
-    }
-
-    // Optional: Method to insert sample data if the table is empty or for testing
-    private void initializeSampleData() throws ServletException {
-        try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
-                Statement stmt = conn.createStatement()) {
-
-            // Check if table is empty
-            ResultSet rs = stmt.executeQuery("SELECT COUNT(*) FROM [dbo].[Products]");
-            if (rs.next() && rs.getInt(1) == 0) {
-                System.out.println(
-                        "[ViVuStoreApplication] initializeSampleData: Products table is empty. Inserting sample data...");
-                stmt.executeUpdate(
-                        "INSERT INTO [dbo].[Products] (Name, UnitPrice, UnitInStock, ThumbnailUrl) VALUES ('Smartphone X', 799.99, 15, 'https://placehold.co/600x400/E8117F/white?text=Smartphone')");
-                stmt.executeUpdate(
-                        "INSERT INTO [dbo].[Products] (Name, UnitPrice, UnitInStock, ThumbnailUrl) VALUES ('Laptop Pro', 1299.99, 10, 'https://placehold.co/600x400/3498DB/white?text=Laptop')");
-                stmt.executeUpdate(
-                        "INSERT INTO [dbo].[Products] (Name, UnitPrice, UnitInStock, ThumbnailUrl) VALUES ('Wireless Headphones', 199.99, 25, 'https://placehold.co/600x400/2ECC71/white?text=Headphones')");
-                stmt.executeUpdate(
-                        "INSERT INTO [dbo].[Products] (Name, UnitPrice, UnitInStock, ThumbnailUrl) VALUES ('Smart Watch', 299.99, 20, 'https://placehold.co/600x400/F39C12/white?text=SmartWatch')");
-                stmt.executeUpdate(
-                        "INSERT INTO [dbo].[Products] (Name, UnitPrice, UnitInStock, ThumbnailUrl) VALUES ('4K Smart TV', 899.99, 5, 'https://placehold.co/600x400/9B59B6/white?text=Smart+TV')");
-                System.out.println("[ViVuStoreApplication] initializeSampleData: Sample data inserted.");
-            } else {
-                System.out.println(
-                        "[ViVuStoreApplication] initializeSampleData: Products table already contains data or an error occurred.");
-            }
-        } catch (SQLException e) {
-            System.err.println(
-                    "[ViVuStoreApplication] initializeSampleData: SQL EXCEPTION during sample data initialization!");
-            e.printStackTrace(System.err);
-            // Not throwing ServletException here as it's optional, but logging is important
-        }
-    }
-
+    
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-
-        System.out.println("[ViVuStoreApplication] doGet: Entered method. Path: " + request.getServletPath()); // DEBUG
-
+        
+        System.out.println("[ViVuStoreApplication] doGet: Entered method. Path: " + request.getServletPath());
+        
         String path = request.getServletPath();
-        System.out.println("[ViVuStoreApplication] doGet: Path: " + path); // DEBUG
-
-        // Set common attributes for all pages
-        request.setAttribute("title", "ViVu Store - Home Page");
-
         String jspPath;
+        
         switch (path) {
             case "/products":
-                request.setAttribute("title", "ViVu Store - Our Products");
-                try {
-                    List<Product> productList = getProductsFromDB();
-                    request.setAttribute("products", productList);
-                } catch (ServletException e) {
-                    System.err.println(
-                            "[ViVuStoreApplication] doGet: Error getting products from DB for /products path.");
-                    e.printStackTrace(System.err);
-                    request.setAttribute("message", "Error: Could not load products.");
-                    request.setAttribute("description", "Please try again later or contact support.");
-                    jspPath = "/index.jsp";
-                    request.setAttribute("products", new ArrayList<Product>());
-
-                    // Forward to error display (e.g., index page with error message)
-                    RequestDispatcher errorDispatcher = request.getRequestDispatcher(jspPath);
-                    try {
-                        errorDispatcher.forward(request, response);
-                    } catch (ServletException | IOException forwardEx) {
-                        System.err.println("[ViVuStoreApplication] doGet: EXCEPTION DURING ERROR FORWARD!");
-                        forwardEx.printStackTrace(System.err);
-                    }
-                    return;
-                }
-                jspPath = "/products.jsp";
-                break;
-
+                handleProductsPage(request, response);
+                return; // handleProductsPage handles the forward
+                
             case "/about":
                 request.setAttribute("title", "ViVu Store - About Us");
                 jspPath = "/about.jsp";
                 break;
-
+                
             case "/contact":
                 request.setAttribute("title", "ViVu Store - Contact Us");
                 jspPath = "/contact.jsp";
                 break;
-
+                
+            case "/product-details":
+                handleProductDetails(request, response);
+                return; // handleProductDetails handles the forward
+                
+            case "/products/add":
+                // Display form for adding a new product
+                request.setAttribute("title", "ViVu Store - Add New Product");
+                forwardToPage(request, response, "/product-form.jsp");
+                return;
+                
+            case "/products/edit":
+                handleEditProductForm(request, response);
+                return;
+                
             default:
                 // Home page or any other path defaults to index
-                String messageValue = "Welcome to ViVu Store!";
-                request.setAttribute("message", messageValue);
+                request.setAttribute("title", "ViVu Store - Home Page");
+                request.setAttribute("message", "Welcome to ViVu Store!");
                 request.setAttribute("description", "Your one-stop shop for all things ViVu.");
-                request.setAttribute("keywords", "ViVu, Store, Shopping, Online Store");
                 jspPath = "/index.jsp";
                 break;
         }
-
+        
         System.out.println("[ViVuStoreApplication] doGet: Forwarding to " + jspPath);
-
+        forwardToPage(request, response, jspPath);
+    }
+    
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        
+        String path = request.getServletPath();
+        System.out.println("[ViVuStoreApplication] doPost: Entered method. Path: " + path);
+        
+        switch (path) {
+            case "/products/add":
+                handleAddProduct(request, response);
+                break;
+                
+            case "/products/update":
+                handleUpdateProduct(request, response);
+                break;
+                
+            case "/products/delete":
+                handleDeleteProduct(request, response);
+                break;
+                
+            default:
+                // If no specific handler, default to GET handling
+                doGet(request, response);
+                break;
+        }
+    }
+    
+    /**
+     * Handle products listing page
+     */
+    private void handleProductsPage(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        
+        request.setAttribute("title", "ViVu Store - Our Products");
+        
+        try {
+            List<Product> products = productRepository.findAll();
+            request.setAttribute("products", products);
+            System.out.println("[ViVuStoreApplication] handleProductsPage: Found " + products.size() + " products");
+            
+            forwardToPage(request, response, "/products.jsp");
+        } catch (Exception e) {
+            System.err.println("[ViVuStoreApplication] handleProductsPage: Error getting products");
+            e.printStackTrace(System.err);
+            
+            request.setAttribute("message", "Error: Could not load products.");
+            request.setAttribute("description", "Please try again later or contact support.");
+            request.setAttribute("products", new ArrayList<Product>());
+            
+            forwardToPage(request, response, "/index.jsp");
+        }
+    }
+    
+    /**
+     * Handle product details page
+     */
+    private void handleProductDetails(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        
+        String productIdParam = request.getParameter("id");
+        
+        if (productIdParam == null || productIdParam.isEmpty()) {
+            // Redirect to products page if no ID provided
+            response.sendRedirect(request.getContextPath() + "/products");
+            return;
+        }
+        
+        try {
+            int productId = Integer.parseInt(productIdParam);
+            Optional<Product> productOpt = productRepository.findById(productId);
+            
+            if (productOpt.isPresent()) {
+                Product product = productOpt.get();
+                request.setAttribute("product", product);
+                request.setAttribute("title", "ViVu Store - " + product.getName());
+                
+                forwardToPage(request, response, "/product-details.jsp");
+            } else {
+                // Product not found, redirect to products page
+                System.out.println("[ViVuStoreApplication] handleProductDetails: Product not found with ID: " + productId);
+                response.sendRedirect(request.getContextPath() + "/products");
+            }
+        } catch (NumberFormatException e) {
+            System.err.println("[ViVuStoreApplication] handleProductDetails: Invalid product ID format: " + productIdParam);
+            response.sendRedirect(request.getContextPath() + "/products");
+        }
+    }
+    
+    /**
+     * Handle adding a new product
+     */
+    private void handleAddProduct(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        
+        try {
+            // Extract product details from form submission
+            String name = request.getParameter("name");
+            double unitPrice = Double.parseDouble(request.getParameter("unitPrice"));
+            int unitInStock = Integer.parseInt(request.getParameter("unitInStock"));
+            String thumbnailUrl = request.getParameter("thumbnailUrl");
+            
+            // Validate required fields
+            if (name == null || name.trim().isEmpty() || thumbnailUrl == null || thumbnailUrl.trim().isEmpty()) {
+                request.setAttribute("errorMessage", "Product name and thumbnail URL are required");
+                forwardToPage(request, response, "/product-form.jsp");
+                return;
+            }
+            
+            // Create and save new product
+            Product newProduct = new Product(0, name, unitPrice, unitInStock, thumbnailUrl);
+            Product savedProduct = productRepository.save(newProduct);
+            
+            System.out.println("[ViVuStoreApplication] handleAddProduct: Product added successfully with ID: " + savedProduct.getId());
+            
+            // Redirect to products page
+            response.sendRedirect(request.getContextPath() + "/products");
+            
+        } catch (NumberFormatException e) {
+            System.err.println("[ViVuStoreApplication] handleAddProduct: Invalid number format in form submission");
+            e.printStackTrace(System.err);
+            
+            request.setAttribute("errorMessage", "Invalid price or stock quantity format");
+            forwardToPage(request, response, "/product-form.jsp");
+        } catch (Exception e) {
+            System.err.println("[ViVuStoreApplication] handleAddProduct: Error adding product");
+            e.printStackTrace(System.err);
+            
+            request.setAttribute("errorMessage", "Error adding product. Please try again.");
+            forwardToPage(request, response, "/product-form.jsp");
+        }
+    }
+    
+    /**
+     * Handle updating an existing product
+     */
+    private void handleUpdateProduct(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        
+        try {
+            // Extract product details from form submission
+            int id = Integer.parseInt(request.getParameter("id"));
+            String name = request.getParameter("name");
+            double unitPrice = Double.parseDouble(request.getParameter("unitPrice"));
+            int unitInStock = Integer.parseInt(request.getParameter("unitInStock"));
+            String thumbnailUrl = request.getParameter("thumbnailUrl");
+            
+            // Validate required fields
+            if (name == null || name.trim().isEmpty() || thumbnailUrl == null || thumbnailUrl.trim().isEmpty()) {
+                request.setAttribute("errorMessage", "Product name and thumbnail URL are required");
+                request.setAttribute("product", productRepository.findById(id).orElse(new Product()));
+                forwardToPage(request, response, "/product-form.jsp");
+                return;
+            }
+            
+            // Check if product exists
+            if (!productRepository.existsById(id)) {
+                System.err.println("[ViVuStoreApplication] handleUpdateProduct: Product not found with ID: " + id);
+                response.sendRedirect(request.getContextPath() + "/products");
+                return;
+            }
+            
+            // Update and save product
+            Product updatedProduct = new Product(id, name, unitPrice, unitInStock, thumbnailUrl);
+            productRepository.save(updatedProduct);
+            
+            System.out.println("[ViVuStoreApplication] handleUpdateProduct: Product updated successfully with ID: " + id);
+            
+            // Redirect to products page
+            response.sendRedirect(request.getContextPath() + "/products");
+            
+        } catch (NumberFormatException e) {
+            System.err.println("[ViVuStoreApplication] handleUpdateProduct: Invalid number format in form submission");
+            e.printStackTrace(System.err);
+            
+            request.setAttribute("errorMessage", "Invalid ID, price, or stock quantity format");
+            forwardToPage(request, response, "/product-form.jsp");
+        } catch (Exception e) {
+            System.err.println("[ViVuStoreApplication] handleUpdateProduct: Error updating product");
+            e.printStackTrace(System.err);
+            
+            request.setAttribute("errorMessage", "Error updating product. Please try again.");
+            forwardToPage(request, response, "/product-form.jsp");
+        }
+    }
+    
+    /**
+     * Handle deleting a product
+     */
+    private void handleDeleteProduct(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        
+        try {
+            int id = Integer.parseInt(request.getParameter("id"));
+            
+            boolean deleted = productRepository.deleteById(id);
+            
+            if (deleted) {
+                System.out.println("[ViVuStoreApplication] handleDeleteProduct: Product deleted successfully with ID: " + id);
+            } else {
+                System.err.println("[ViVuStoreApplication] handleDeleteProduct: Failed to delete product with ID: " + id);
+            }
+            
+            // Redirect to products page
+            response.sendRedirect(request.getContextPath() + "/products");
+            
+        } catch (NumberFormatException e) {
+            System.err.println("[ViVuStoreApplication] handleDeleteProduct: Invalid product ID format");
+            e.printStackTrace(System.err);
+            response.sendRedirect(request.getContextPath() + "/products");
+        } catch (Exception e) {
+            System.err.println("[ViVuStoreApplication] handleDeleteProduct: Error deleting product");
+            e.printStackTrace(System.err);
+            response.sendRedirect(request.getContextPath() + "/products");
+        }
+    }
+    
+    /**
+     * Helper method to forward to a JSP page
+     */
+    private void forwardToPage(HttpServletRequest request, HttpServletResponse response, String jspPath)
+            throws ServletException, IOException {
+        
         RequestDispatcher dispatcher = request.getRequestDispatcher(jspPath);
         try {
             dispatcher.forward(request, response);
-            System.out.println("[ViVuStoreApplication] doGet: Forward completed successfully");
-        } catch (Exception e) { // Catching general Exception as specified by original code
-            System.err.println("[ViVuStoreApplication] doGet: EXCEPTION DURING FORWARD!");
+            System.out.println("[ViVuStoreApplication] forwardToPage: Forward completed successfully to " + jspPath);
+        } catch (Exception e) {
+            System.err.println("[ViVuStoreApplication] forwardToPage: Exception during forward to " + jspPath);
             e.printStackTrace(System.err);
             throw e;
+        }
+    }
+    
+    /**
+     * Handle displaying the product edit form
+     */
+    private void handleEditProductForm(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        
+        String productIdParam = request.getParameter("id");
+        
+        if (productIdParam == null || productIdParam.isEmpty()) {
+            // Redirect to products page if no ID provided
+            response.sendRedirect(request.getContextPath() + "/products");
+            return;
+        }
+        
+        try {
+            int productId = Integer.parseInt(productIdParam);
+            Optional<Product> productOpt = productRepository.findById(productId);
+            
+            if (productOpt.isPresent()) {
+                Product product = productOpt.get();
+                request.setAttribute("product", product);
+                request.setAttribute("title", "ViVu Store - Edit " + product.getName());
+                
+                forwardToPage(request, response, "/product-form.jsp");
+            } else {
+                // Product not found, redirect to products page
+                System.out.println("[ViVuStoreApplication] handleEditProductForm: Product not found with ID: " + productId);
+                response.sendRedirect(request.getContextPath() + "/products");
+            }
+        } catch (NumberFormatException e) {
+            System.err.println("[ViVuStoreApplication] handleEditProductForm: Invalid product ID format: " + productIdParam);
+            response.sendRedirect(request.getContextPath() + "/products");
         }
     }
 }
