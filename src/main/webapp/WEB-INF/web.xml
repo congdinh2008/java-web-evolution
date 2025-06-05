@@ -5,14 +5,8 @@
     version="6.0">
 
     <display-name>ViVuStore Web Application</display-name>
-
-    <!-- Spring Context Configuration -->
-    <context-param>
-        <param-name>contextConfigLocation</param-name>
-        <param-value>classpath:applicationContext.xml</param-value>
-    </context-param>
     
-    <!-- Spring Context Loader Listener -->
+    <!-- Spring Context Loader Listener (Using Annotation-based Configuration) -->
     <listener>
         <listener-class>com.congdinh.utils.SpringContextLoaderListener</listener-class>
     </listener>

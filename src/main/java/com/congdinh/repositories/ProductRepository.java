@@ -9,10 +9,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
+import org.springframework.stereotype.Repository;
 
 import com.congdinh.models.Product;
 import com.congdinh.utils.DatabaseUtil;
@@ -20,7 +22,8 @@ import com.congdinh.utils.DatabaseUtil;
 /**
  * Repository implementation for Product entity
  */
-public class ProductRepository implements Repository<Product, Integer> {
+@Repository
+public class ProductRepository implements com.congdinh.repositories.Repository<Product, Integer> {
     
     private static final String FIND_ALL_SQL = "SELECT Id, Name, UnitPrice, UnitInStock, ThumbnailUrl FROM Products";
     private static final String FIND_BY_ID_SQL = "SELECT Id, Name, UnitPrice, UnitInStock, ThumbnailUrl FROM Products WHERE Id = ?";
@@ -32,12 +35,18 @@ public class ProductRepository implements Repository<Product, Integer> {
     
     private JdbcTemplate jdbcTemplate;
     
-    // For backward compatibility with direct instantiation
+    // Default constructor for non-Spring contexts
     public ProductRepository() {
-        // Default constructor for non-Spring contexts
+        // Empty constructor
     }
     
-    // Getter and setter for jdbcTemplate (used by Spring)
+    // Constructor with dependency injection
+    @Autowired
+    public ProductRepository(JdbcTemplate jdbcTemplate) {
+        this.jdbcTemplate = jdbcTemplate;
+    }
+    
+    // Getter and setter for jdbcTemplate (for backward compatibility)
     public void setJdbcTemplate(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }

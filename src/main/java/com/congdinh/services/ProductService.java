@@ -3,26 +3,32 @@ package com.congdinh.services;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import com.congdinh.models.Product;
 import com.congdinh.repositories.ProductRepository;
 
 /**
  * Service layer for Product-related operations
  */
+@Service
 public class ProductService {
     
     private ProductRepository productRepository;
     
     // Default constructor for non-Spring contexts
     public ProductService() {
+        // Empty constructor
     }
     
     // Constructor with dependency injection
+    @Autowired
     public ProductService(ProductRepository productRepository) {
         this.productRepository = productRepository;
     }
     
-    // Setter for dependency injection by Spring
+    // Setter for dependency injection by Spring (for backward compatibility)
     public void setProductRepository(ProductRepository productRepository) {
         this.productRepository = productRepository;
     }

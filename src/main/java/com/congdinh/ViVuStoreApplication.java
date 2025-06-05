@@ -27,7 +27,7 @@ public class ViVuStoreApplication extends HttpServlet {
     public void init() throws ServletException {
         // Get the ProductService bean from Spring ApplicationContext
         try {
-            productService = SpringContextLoaderListener.getBean("productService", ProductService.class);
+            productService = SpringContextLoaderListener.getBean(ProductService.class);
             System.out.println("[ViVuStoreApplication] init: Obtained ProductService from Spring ApplicationContext");
         } catch (Exception e) {
             System.err.println("[ViVuStoreApplication] init: Error getting ProductService from Spring context");

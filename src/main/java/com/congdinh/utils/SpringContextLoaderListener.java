@@ -2,13 +2,16 @@ package com.congdinh.utils;
 
 import org.springframework.context.ApplicationContext;
 import org.springframework.web.context.ContextLoaderListener;
-import org.springframework.web.context.support.WebApplicationContextUtils;
+import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
+
+import com.congdinh.config.AppConfig;
 
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletContextEvent;
 
 /**
  * Custom ContextLoaderListener to initialize and provide access to the Spring ApplicationContext
+ * Uses annotation-based configuration
  */
 public class SpringContextLoaderListener extends ContextLoaderListener {
     
@@ -16,14 +19,21 @@ public class SpringContextLoaderListener extends ContextLoaderListener {
     
     @Override
     public void contextInitialized(ServletContextEvent event) {
-        // Call the parent method to initialize the WebApplicationContext
-        super.contextInitialized(event);
+        // Set up the Annotation Config Web Application Context
+        AnnotationConfigWebApplicationContext ctx = new AnnotationConfigWebApplicationContext();
+        ctx.register(AppConfig.class);
+        
+        // Set the ServletContext in the application context
+        ServletContext servletContext = event.getServletContext();
+        ctx.setServletContext(servletContext);
+        
+        // Initialize the WebApplicationContext
+        ctx.refresh();
         
         // Store the ApplicationContext in our static variable
-        ServletContext servletContext = event.getServletContext();
-        context = WebApplicationContextUtils.getWebApplicationContext(servletContext);
+        context = ctx;
         
-        System.out.println("[SpringContextLoaderListener] Spring ApplicationContext initialized successfully");
+        System.out.println("[SpringContextLoaderListener] Spring ApplicationContext initialized successfully with Java-based configuration");
     }
     
     /**
