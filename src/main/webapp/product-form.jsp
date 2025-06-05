@@ -4,7 +4,7 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>${empty product ? 'Add New Product' : 'Edit Product'} - ViVu Store</title>
+    <title>${product.id == 0 ? 'Add New Product' : 'Edit Product'} - ViVu Store</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -109,14 +109,14 @@
     </header>
 
     <div class="container">
-        <h1>${empty product ? 'Add New Product' : 'Edit Product'}</h1>
+        <h1>${product.id == 0 ? 'Add New Product' : 'Edit Product'}</h1>
         
         <c:if test="${not empty errorMessage}">
             <div class="error-message">${errorMessage}</div>
         </c:if>
         
         <div class="form-section">
-            <form class="product-form" method="post" action="${pageContext.request.contextPath}${empty product ? '/products/add' : '/products/update'}">
+            <form class="product-form" method="post" action="${pageContext.request.contextPath}${product.id == 0 ? '/products/add' : '/products/update'}">
                 <c:if test="${not empty product}">
                     <input type="hidden" name="id" value="${product.id}">
                 </c:if>
@@ -138,11 +138,11 @@
                 
                 <div class="form-group">
                     <label for="thumbnailUrl">Thumbnail URL</label>
-                    <input type="url" id="thumbnailUrl" name="thumbnailUrl" required value="${empty product ? 'https://placehold.co/600x400?text=New+Product' : product.thumbnailUrl}">
+                    <input type="url" id="thumbnailUrl" name="thumbnailUrl" required value="${product.id == 0 && empty product.thumbnailUrl ? 'https://placehold.co/600x400?text=New+Product' : product.thumbnailUrl}">
                 </div>
                 
                 <div class="buttons">
-                    <button type="submit">${empty product ? 'Add Product' : 'Update Product'}</button>
+                    <button type="submit">${product.id == 0 ? 'Add Product' : 'Update Product'}</button>
                     <a href="${pageContext.request.contextPath}/products" class="button cancel-button">Cancel</a>
                 </div>
             </form>

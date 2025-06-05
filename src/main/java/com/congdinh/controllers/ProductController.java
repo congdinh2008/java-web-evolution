@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import com.congdinh.models.Product;
+import com.congdinh.dto.ProductDTO;
 import com.congdinh.services.ProductService;
 
 /**
@@ -37,7 +38,7 @@ public class ProductController {
     @GetMapping
     public String listProducts(Model model) {
         try {
-            List<Product> products = productService.findAllProducts();
+            List<ProductDTO> products = productService.findAllProducts();
             model.addAttribute("products", products);
             model.addAttribute("title", "ViVu Store - Our Products");
             System.out.println("[ProductController] listProducts: Found " + products.size() + " products");
@@ -49,7 +50,7 @@ public class ProductController {
             
             model.addAttribute("message", "Error: Could not load products.");
             model.addAttribute("description", "Please try again later or contact support.");
-            model.addAttribute("products", new ArrayList<Product>());
+            model.addAttribute("products", new ArrayList<ProductDTO>());
             
             return "index";
         }
@@ -61,10 +62,10 @@ public class ProductController {
     @GetMapping("/details")
     public String viewProductDetails(@RequestParam("id") Integer productId, Model model, RedirectAttributes redirectAttributes) {
         try {
-            Optional<Product> productOpt = productService.findProductById(productId);
+            Optional<ProductDTO> productOpt = productService.findProductById(productId);
             
             if (productOpt.isPresent()) {
-                Product product = productOpt.get();
+                ProductDTO product = productOpt.get();
                 model.addAttribute("product", product);
                 model.addAttribute("title", "ViVu Store - " + product.getName());
                 
@@ -87,7 +88,10 @@ public class ProductController {
     @GetMapping("/add")
     public String showAddProductForm(Model model) {
         model.addAttribute("title", "ViVu Store - Add New Product");
-        // No need to add empty product - the form handles this case
+        // Create an empty DTO for the form with ID explicitly set to 0
+        ProductDTO newProduct = new ProductDTO();
+        newProduct.setId(0); // Explicitly set ID to 0 for new products
+        model.addAttribute("product", newProduct);
         return "product-form";
     }
     
@@ -95,7 +99,7 @@ public class ProductController {
      * Process form submission to add a new product
      */
     @PostMapping("/add")
-    public String addProduct(@ModelAttribute Product product, Model model, RedirectAttributes redirectAttributes) {
+    public String addProduct(@ModelAttribute ProductDTO product, Model model, RedirectAttributes redirectAttributes) {
         try {
             // Validate required fields
             if (product.getName() == null || product.getName().trim().isEmpty() || 
@@ -106,7 +110,7 @@ public class ProductController {
             }
             
             // Save new product
-            Product savedProduct = productService.saveProduct(product);
+            ProductDTO savedProduct = productService.saveProduct(product);
             System.out.println("[ProductController] addProduct: Product added successfully with ID: " + savedProduct.getId());
             
             // Redirect to products list
@@ -127,10 +131,10 @@ public class ProductController {
     @GetMapping("/edit")
     public String showEditProductForm(@RequestParam("id") Integer productId, Model model, RedirectAttributes redirectAttributes) {
         try {
-            Optional<Product> productOpt = productService.findProductById(productId);
+            Optional<ProductDTO> productOpt = productService.findProductById(productId);
             
             if (productOpt.isPresent()) {
-                Product product = productOpt.get();
+                ProductDTO product = productOpt.get();
                 model.addAttribute("product", product);
                 model.addAttribute("title", "ViVu Store - Edit " + product.getName());
                 
@@ -151,7 +155,7 @@ public class ProductController {
      * Process form submission to update an existing product
      */
     @PostMapping("/update")
-    public String updateProduct(@ModelAttribute Product product, Model model, RedirectAttributes redirectAttributes) {
+    public String updateProduct(@ModelAttribute ProductDTO product, Model model, RedirectAttributes redirectAttributes) {
         try {
             // Validate required fields
             if (product.getName() == null || product.getName().trim().isEmpty() || 
@@ -199,6 +203,80 @@ public class ProductController {
         } catch (Exception e) {
             System.err.println("[ProductController] deleteProduct: Error deleting product");
             e.printStackTrace(System.err);
+            return "redirect:/products";
+        }
+    }
+    
+    /**
+     * Search products by name
+     */
+    @GetMapping("/search")
+    public String searchProducts(@RequestParam(required = false) String name,
+                                @RequestParam(required = false) Double minPrice,
+                                @RequestParam(required = false) Double maxPrice,
+                                @RequestParam(defaultValue = "0") int page,
+                                @RequestParam(defaultValue = "10") int size,
+                                @RequestParam(defaultValue = "name") String sortBy,
+                                @RequestParam(defaultValue = "ASC") String direction,
+                                Model model) {
+        try {
+            Page<ProductDTO> productPage;
+            List<ProductDTO> products;
+            
+            // If name is provided, search by name
+            if (name != null && !name.trim().isEmpty()) {
+                productPage = productService.findPaginatedProductsByName(name, page, size);
+                model.addAttribute("searchTerm", name);
+            } 
+            // If price range is provided, search by price range
+            else if (minPrice != null && maxPrice != null) {
+                products = productService.findProductsInPriceRange(minPrice, maxPrice);
+                model.addAttribute("products", products);
+                model.addAttribute("minPrice", minPrice);
+                model.addAttribute("maxPrice", maxPrice);
+                model.addAttribute("title", "ViVu Store - Products $" + minPrice + " - $" + maxPrice);
+                return "products";
+            }
+            // Otherwise, return all products with pagination
+            else {
+                productPage = productService.findPaginatedProducts(page, size, sortBy, direction);
+            }
+            
+            model.addAttribute("productPage", productPage);
+            model.addAttribute("currentPage", page);
+            model.addAttribute("totalPages", productPage.getTotalPages());
+            model.addAttribute("totalItems", productPage.getTotalElements());
+            model.addAttribute("sortBy", sortBy);
+            model.addAttribute("direction", direction);
+            model.addAttribute("title", "ViVu Store - Search Results");
+            
+            return "product-search";
+        } catch (Exception e) {
+            System.err.println("[ProductController] searchProducts: Error searching products");
+            e.printStackTrace(System.err);
+            
+            model.addAttribute("message", "Error: Could not search products.");
+            model.addAttribute("description", "Please try again later or contact support.");
+            return "error";
+        }
+    }
+    
+    /**
+     * Get products with low stock for inventory management
+     */
+    @GetMapping("/low-stock")
+    public String getLowStockProducts(@RequestParam(defaultValue = "5") int threshold, Model model) {
+        try {
+            List<ProductDTO> products = productService.findProductsWithLowStock(threshold);
+            model.addAttribute("products", products);
+            model.addAttribute("threshold", threshold);
+            model.addAttribute("title", "ViVu Store - Low Stock Products");
+            
+            return "low-stock-products";
+        } catch (Exception e) {
+            System.err.println("[ProductController] getLowStockProducts: Error getting low stock products");
+            e.printStackTrace(System.err);
+            
             return "redirect:/products";
         }
     }
