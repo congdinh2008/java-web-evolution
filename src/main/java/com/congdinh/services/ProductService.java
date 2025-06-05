@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.congdinh.models.Product;
-import com.congdinh.repositories.ProductRepositoryInterface;
+import com.congdinh.repositories.ProductJPARepository;
 
 /**
  * Service layer for Product-related operations
@@ -17,21 +17,10 @@ import com.congdinh.repositories.ProductRepositoryInterface;
 @Transactional
 public class ProductService {
     
-    private ProductRepositoryInterface productRepository;
+    private final ProductJPARepository productRepository;
     
-    // Default constructor for non-Spring contexts
-    public ProductService() {
-        // Empty constructor
-    }
-    
-    // Constructor with dependency injection
     @Autowired
-    public ProductService(@org.springframework.beans.factory.annotation.Qualifier("hibernateProductRepository") ProductRepositoryInterface productRepository) {
-        this.productRepository = productRepository;
-    }
-    
-    // Setter for dependency injection by Spring (for backward compatibility)
-    public void setProductRepository(@org.springframework.beans.factory.annotation.Qualifier("hibernateProductRepository") ProductRepositoryInterface productRepository) {
+    public ProductService(ProductJPARepository productRepository) {
         this.productRepository = productRepository;
     }
     
@@ -66,10 +55,9 @@ public class ProductService {
     /**
      * Delete a product by ID
      * @param id Product ID to delete
-     * @return true if deleted, false otherwise
      */
-    public boolean deleteProductById(Integer id) {
-        return productRepository.deleteById(id);
+    public void deleteProductById(Integer id) {
+        productRepository.deleteById(id);
     }
     
     /**
@@ -80,21 +68,5 @@ public class ProductService {
     @Transactional(readOnly = true)
     public boolean productExistsById(Integer id) {
         return productRepository.existsById(id);
-    }
-    
-    /**
-     * Initialize the Products table if it doesn't exist
-     */
-    @Transactional
-    public void createProductsTableIfNotExists() {
-        productRepository.createProductsTableIfNotExists();
-    }
-    
-    /**
-     * Initialize sample data if the table is empty
-     */
-    @Transactional
-    public void initializeSampleData() {
-        productRepository.initializeSampleData();
     }
 }

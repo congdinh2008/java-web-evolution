@@ -6,7 +6,6 @@ import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -14,7 +13,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-import jakarta.annotation.PostConstruct;
 
 import com.congdinh.models.Product;
 import com.congdinh.services.ProductService;
@@ -31,26 +29,6 @@ public class ProductController {
     @Autowired
     public ProductController(ProductService productService) {
         this.productService = productService;
-    }
-    
-    /**
-     * Initialize database after controller construction
-     * Wrapped in try-catch to handle any transaction or database initialization issues
-     */
-    @PostConstruct
-    public void init() {
-        try {
-            // Create the Products table if it does not exist
-            this.productService.createProductsTableIfNotExists();
-            System.out.println("[ProductController] init: Products table checked/created.");
-            
-            // Optionally, initialize sample data if the table is empty
-            this.productService.initializeSampleData();
-            System.out.println("[ProductController] init: Sample data initialization checked.");
-        } catch (Exception e) {
-            System.err.println("[ProductController] init: Error during initialization: " + e.getMessage());
-            e.printStackTrace();
-        }
     }
     
     /**
@@ -212,13 +190,8 @@ public class ProductController {
     @PostMapping("/delete")
     public String deleteProduct(@RequestParam("id") Integer productId, RedirectAttributes redirectAttributes) {
         try {
-            boolean deleted = productService.deleteProductById(productId);
-            
-            if (deleted) {
-                System.out.println("[ProductController] deleteProduct: Product deleted successfully with ID: " + productId);
-            } else {
-                System.err.println("[ProductController] deleteProduct: Failed to delete product with ID: " + productId);
-            }
+            productService.deleteProductById(productId);
+            System.out.println("[ProductController] deleteProduct: Product deleted successfully with ID: " + productId);
             
             // Redirect to products list
             return "redirect:/products";

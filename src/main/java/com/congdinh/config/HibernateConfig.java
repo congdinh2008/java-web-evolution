@@ -4,10 +4,10 @@ import java.util.Properties;
 
 import javax.sql.DataSource;
 
-import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
@@ -17,10 +17,11 @@ import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 
 /**
- * Hibernate configuration for the application using JPA with Hibernate as provider
+ * JPA and Hibernate configuration for the application
  */
 @org.springframework.context.annotation.Configuration
 @EnableTransactionManagement
+@EnableJpaRepositories(basePackages = "com.congdinh.repositories")
 @PropertySource("classpath:db.properties")
 public class HibernateConfig {
     
@@ -56,19 +57,10 @@ public class HibernateConfig {
     }
     
     /**
-     * SessionFactory bean directly obtained from Hibernate native API
-     * This approach uses both JPA and direct Hibernate SessionFactory
-     */
-    @Bean(name = "sessionFactory") 
-    public SessionFactory sessionFactory(EntityManagerFactory emf) {
-        return emf.unwrap(SessionFactory.class);
-    }
-    
-    /**
      * Transaction manager for JPA
      */
     @Bean
-    public PlatformTransactionManager transactionManager(@org.springframework.beans.factory.annotation.Qualifier("entityManagerFactory") EntityManagerFactory emf) {
+    public PlatformTransactionManager transactionManager(EntityManagerFactory emf) {
         JpaTransactionManager transactionManager = new JpaTransactionManager();
         transactionManager.setEntityManagerFactory(emf);
         return transactionManager;
