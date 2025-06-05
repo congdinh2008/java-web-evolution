@@ -22,8 +22,8 @@ import com.congdinh.utils.DatabaseUtil;
 /**
  * Repository implementation for Product entity
  */
-@Repository
-public class ProductRepository implements com.congdinh.repositories.Repository<Product, Integer> {
+@Repository("jdbcProductRepository")
+public class ProductRepository implements ProductRepositoryInterface {
     
     private static final String FIND_ALL_SQL = "SELECT Id, Name, UnitPrice, UnitInStock, ThumbnailUrl FROM Products";
     private static final String FIND_BY_ID_SQL = "SELECT Id, Name, UnitPrice, UnitInStock, ThumbnailUrl FROM Products WHERE Id = ?";

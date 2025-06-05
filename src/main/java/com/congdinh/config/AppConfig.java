@@ -1,9 +1,12 @@
 package com.congdinh.config;
 
+import javax.sql.DataSource;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.Environment;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -15,17 +18,22 @@ import org.springframework.jdbc.datasource.DriverManagerDataSource;
 @Configuration
 @ComponentScan(basePackages = {"com.congdinh.repositories", "com.congdinh.services", "com.congdinh.utils"})
 @PropertySource("classpath:db.properties")
+@Import(HibernateConfig.class)
 public class AppConfig {
     
+    private final Environment env;
+    
     @Autowired
-    private Environment env;
+    public AppConfig(Environment env) {
+        this.env = env;
+    }
     
     /**
      * Define DataSource bean
      * @return configured DataSource
      */
     @Bean
-    public DriverManagerDataSource dataSource() {
+    public DataSource dataSource() {
         DriverManagerDataSource dataSource = new DriverManagerDataSource();
         dataSource.setDriverClassName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
         dataSource.setUrl(env.getProperty("db.url"));
@@ -35,7 +43,7 @@ public class AppConfig {
     }
     
     /**
-     * Define JdbcTemplate bean
+     * Define JdbcTemplate bean (for backward compatibility)
      * @return configured JdbcTemplate
      */
     @Bean
