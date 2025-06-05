@@ -6,61 +6,8 @@
 
     <display-name>ViVuStore Web Application</display-name>
     
-    <!-- Spring Context Loader Listener (Using Annotation-based Configuration) -->
-    <listener>
-        <listener-class>com.congdinh.utils.SpringContextLoaderListener</listener-class>
-    </listener>
-
-    <servlet>
-        <servlet-name>ViVuStoreApplication</servlet-name>
-        <servlet-class>com.congdinh.ViVuStoreApplication</servlet-class>
-    </servlet>
-
-    <servlet-mapping>
-        <servlet-name>ViVuStoreApplication</servlet-name>
-        <url-pattern>/</url-pattern>
-    </servlet-mapping>
-    
-    <servlet-mapping>
-        <servlet-name>ViVuStoreApplication</servlet-name>
-        <url-pattern>/products</url-pattern>
-    </servlet-mapping>
-    
-    <servlet-mapping>
-        <servlet-name>ViVuStoreApplication</servlet-name>
-        <url-pattern>/about</url-pattern>
-    </servlet-mapping>
-    
-    <servlet-mapping>
-        <servlet-name>ViVuStoreApplication</servlet-name>
-        <url-pattern>/contact</url-pattern>
-    </servlet-mapping>
-    
-    <!-- Product CRUD URL patterns -->
-    <servlet-mapping>
-        <servlet-name>ViVuStoreApplication</servlet-name>
-        <url-pattern>/product-details</url-pattern>
-    </servlet-mapping>
-    
-    <servlet-mapping>
-        <servlet-name>ViVuStoreApplication</servlet-name>
-        <url-pattern>/products/add</url-pattern>
-    </servlet-mapping>
-    
-    <servlet-mapping>
-        <servlet-name>ViVuStoreApplication</servlet-name>
-        <url-pattern>/products/update</url-pattern>
-    </servlet-mapping>
-    
-    <servlet-mapping>
-        <servlet-name>ViVuStoreApplication</servlet-name>
-        <url-pattern>/products/delete</url-pattern>
-    </servlet-mapping>
-    
-    <servlet-mapping>
-        <servlet-name>ViVuStoreApplication</servlet-name>
-        <url-pattern>/products/edit</url-pattern>
-    </servlet-mapping>
+    <!-- Spring MVC will handle the configuration through WebInitializer -->
+    <!-- No need for Spring Context Loader Listener as it's handled by WebInitializer -->
 
     <welcome-file-list>
         <welcome-file>index.jsp</welcome-file>

@@ -13,7 +13,7 @@ import org.springframework.jdbc.datasource.DriverManagerDataSource;
  * Spring Java Configuration class to replace XML configuration
  */
 @Configuration
-@ComponentScan(basePackages = "com.congdinh")
+@ComponentScan(basePackages = {"com.congdinh.repositories", "com.congdinh.services", "com.congdinh.utils"})
 @PropertySource("classpath:db.properties")
 public class AppConfig {
     

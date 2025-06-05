@@ -166,7 +166,7 @@
                 <div class="products-grid">
                     <c:forEach var="product" items="${products}">
                         <div class="product-card">
-                            <a href="${pageContext.request.contextPath}/product-details?id=${product.id}"
+                            <a href="${pageContext.request.contextPath}/products/details?id=${product.id}"
                                 style="text-decoration: none; color: inherit;">
                                 <img src="${product.thumbnailUrl}" alt="${product.name}" class="product-image">
                                 <h3>${product.name}</h3>
