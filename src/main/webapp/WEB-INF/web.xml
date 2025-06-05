@@ -6,6 +6,17 @@
 
     <display-name>ViVuStore Web Application</display-name>
 
+    <!-- Spring Context Configuration -->
+    <context-param>
+        <param-name>contextConfigLocation</param-name>
+        <param-value>classpath:applicationContext.xml</param-value>
+    </context-param>
+    
+    <!-- Spring Context Loader Listener -->
+    <listener>
+        <listener-class>com.congdinh.utils.SpringContextLoaderListener</listener-class>
+    </listener>
+
     <servlet>
         <servlet-name>ViVuStoreApplication</servlet-name>
         <servlet-class>com.congdinh.ViVuStoreApplication</servlet-class>

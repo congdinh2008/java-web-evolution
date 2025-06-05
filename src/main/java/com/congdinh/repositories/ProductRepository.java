@@ -9,6 +9,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
+
 import com.congdinh.models.Product;
 import com.congdinh.utils.DatabaseUtil;
 
@@ -24,27 +29,58 @@ public class ProductRepository implements Repository<Product, Integer> {
     private static final String DELETE_SQL = "DELETE FROM Products WHERE Id = ?";
     private static final String EXISTS_SQL = "SELECT COUNT(*) FROM Products WHERE Id = ?";
     private static final String COUNT_ALL_SQL = "SELECT COUNT(*) FROM Products";
+    
+    private JdbcTemplate jdbcTemplate;
+    
+    // For backward compatibility with direct instantiation
+    public ProductRepository() {
+        // Default constructor for non-Spring contexts
+    }
+    
+    // Getter and setter for jdbcTemplate (used by Spring)
+    public void setJdbcTemplate(JdbcTemplate jdbcTemplate) {
+        this.jdbcTemplate = jdbcTemplate;
+    }
+    
+    public JdbcTemplate getJdbcTemplate() {
+        return jdbcTemplate;
+    }
+    
+    // Row mapper for Product entity
+    private RowMapper<Product> productRowMapper = (rs, rowNum) -> new Product(
+        rs.getInt("Id"),
+        rs.getString("Name"),
+        rs.getDouble("UnitPrice"),
+        rs.getInt("UnitInStock"),
+        rs.getString("ThumbnailUrl")
+    );
 
     /**
      * Find all products
      */
     @Override
     public List<Product> findAll() {
-        List<Product> products = new ArrayList<>();
-        
-        try (Connection conn = DatabaseUtil.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(FIND_ALL_SQL);
-             ResultSet rs = stmt.executeQuery()) {
+        if (jdbcTemplate != null) {
+            // Use Spring JdbcTemplate
+            return jdbcTemplate.query(FIND_ALL_SQL, productRowMapper);
+        } else {
+            // Fallback to direct JDBC
+            List<Product> products = new ArrayList<>();
             
-            while (rs.next()) {
-                products.add(mapResultSetToProduct(rs));
+            try (Connection conn = DatabaseUtil.getConnection();
+                 PreparedStatement stmt = conn.prepareStatement(FIND_ALL_SQL);
+                 ResultSet rs = stmt.executeQuery()) {
+                
+                while (rs.next()) {
+                    products.add(mapResultSetToProduct(rs));
+                }
+            } catch (SQLException e) {
+                System.err.println("[ProductRepository] findAll: SQL Exception");
+                e.printStackTrace(System.err);
             }
-        } catch (SQLException e) {
-            System.err.println("[ProductRepository] findAll: SQL Exception");
-            e.printStackTrace(System.err);
+            
+            return products;
         }
-        
-        return products;
     }
 
     /**
@@ -52,22 +88,35 @@ public class ProductRepository implements Repository<Product, Integer> {
      */
     @Override
     public Optional<Product> findById(Integer id) {
-        try (Connection conn = DatabaseUtil.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(FIND_BY_ID_SQL)) {
-            
-            stmt.setInt(1, id);
-            
-            try (ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) {
-                    return Optional.of(mapResultSetToProduct(rs));
-                }
+        if (jdbcTemplate != null) {
+            // Use Spring JdbcTemplate
+            try {
+                Product product = jdbcTemplate.queryForObject(FIND_BY_ID_SQL, productRowMapper, id);
+                return Optional.ofNullable(product);
+            } catch (Exception e) {
+                System.err.println("[ProductRepository] findById: Exception for ID: " + id);
+                e.printStackTrace(System.err);
+                return Optional.empty();
             }
-        } catch (SQLException e) {
-            System.err.println("[ProductRepository] findById: SQL Exception for ID: " + id);
-            e.printStackTrace(System.err);
+        } else {
+            // Fallback to direct JDBC
+            try (Connection conn = DatabaseUtil.getConnection();
+                 PreparedStatement stmt = conn.prepareStatement(FIND_BY_ID_SQL)) {
+                
+                stmt.setInt(1, id);
+                
+                try (ResultSet rs = stmt.executeQuery()) {
+                    if (rs.next()) {
+                        return Optional.of(mapResultSetToProduct(rs));
+                    }
+                }
+            } catch (SQLException e) {
+                System.err.println("[ProductRepository] findById: SQL Exception for ID: " + id);
+                e.printStackTrace(System.err);
+            }
+            
+            return Optional.empty();
         }
-        
-        return Optional.empty();
     }
 
     /**
@@ -75,6 +124,53 @@ public class ProductRepository implements Repository<Product, Integer> {
      */
     @Override
     public Product save(Product product) {
+        if (jdbcTemplate != null) {
+            return saveWithJdbcTemplate(product);
+        } else {
+            return saveWithDirectJdbc(product);
+        }
+    }
+    
+    /**
+     * Save using Spring JdbcTemplate
+     */
+    private Product saveWithJdbcTemplate(Product product) {
+        if (product.getId() > 0 && existsById(product.getId())) {
+            // Update existing product
+            jdbcTemplate.update(UPDATE_SQL, 
+                product.getName(), 
+                product.getUnitPrice(), 
+                product.getUnitInStock(), 
+                product.getThumbnailUrl(),
+                product.getId()
+            );
+            return product;
+        } else {
+            // Insert new product
+            KeyHolder keyHolder = new GeneratedKeyHolder();
+            
+            jdbcTemplate.update(connection -> {
+                PreparedStatement ps = connection.prepareStatement(SAVE_SQL, Statement.RETURN_GENERATED_KEYS);
+                ps.setString(1, product.getName());
+                ps.setDouble(2, product.getUnitPrice());
+                ps.setInt(3, product.getUnitInStock());
+                ps.setString(4, product.getThumbnailUrl());
+                return ps;
+            }, keyHolder);
+            
+            Number key = keyHolder.getKey();
+            if (key != null) {
+                product.setId(key.intValue());
+            }
+            
+            return product;
+        }
+    }
+    
+    /**
+     * Save using direct JDBC connection
+     */
+    private Product saveWithDirectJdbc(Product product) {
         Connection conn = null;
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -92,7 +188,6 @@ public class ProductRepository implements Repository<Product, Integer> {
                 stmt.setInt(5, product.getId());
                 
                 stmt.executeUpdate();
-                return product;
             } else {
                 // Insert new product
                 stmt = conn.prepareStatement(SAVE_SQL, Statement.RETURN_GENERATED_KEYS);
@@ -109,9 +204,9 @@ public class ProductRepository implements Repository<Product, Integer> {
                         product.setId(rs.getInt(1));
                     }
                 }
-                
-                return product;
             }
+            
+            return product;
         } catch (SQLException e) {
             System.err.println("[ProductRepository] save: SQL Exception");
             e.printStackTrace(System.err);
@@ -126,17 +221,24 @@ public class ProductRepository implements Repository<Product, Integer> {
      */
     @Override
     public boolean deleteById(Integer id) {
-        try (Connection conn = DatabaseUtil.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(DELETE_SQL)) {
-            
-            stmt.setInt(1, id);
-            
-            int affectedRows = stmt.executeUpdate();
-            return affectedRows > 0;
-        } catch (SQLException e) {
-            System.err.println("[ProductRepository] deleteById: SQL Exception for ID: " + id);
-            e.printStackTrace(System.err);
-            return false;
+        if (jdbcTemplate != null) {
+            // Use Spring JdbcTemplate
+            int rowsAffected = jdbcTemplate.update(DELETE_SQL, id);
+            return rowsAffected > 0;
+        } else {
+            // Fallback to direct JDBC
+            try (Connection conn = DatabaseUtil.getConnection();
+                 PreparedStatement stmt = conn.prepareStatement(DELETE_SQL)) {
+                
+                stmt.setInt(1, id);
+                
+                int affectedRows = stmt.executeUpdate();
+                return affectedRows > 0;
+            } catch (SQLException e) {
+                System.err.println("[ProductRepository] deleteById: SQL Exception for ID: " + id);
+                e.printStackTrace(System.err);
+                return false;
+            }
         }
     }
 
@@ -145,22 +247,35 @@ public class ProductRepository implements Repository<Product, Integer> {
      */
     @Override
     public boolean existsById(Integer id) {
-        try (Connection conn = DatabaseUtil.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(EXISTS_SQL)) {
-            
-            stmt.setInt(1, id);
-            
-            try (ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) {
-                    return rs.getInt(1) > 0;
-                }
+        if (jdbcTemplate != null) {
+            // Use Spring JdbcTemplate
+            try {
+                Integer count = jdbcTemplate.queryForObject(EXISTS_SQL, Integer.class, id);
+                return count != null && count > 0;
+            } catch (Exception e) {
+                System.err.println("[ProductRepository] existsById: Exception for ID: " + id);
+                e.printStackTrace(System.err);
+                return false;
             }
-        } catch (SQLException e) {
-            System.err.println("[ProductRepository] existsById: SQL Exception for ID: " + id);
-            e.printStackTrace(System.err);
+        } else {
+            // Fallback to direct JDBC
+            try (Connection conn = DatabaseUtil.getConnection();
+                 PreparedStatement stmt = conn.prepareStatement(EXISTS_SQL)) {
+                
+                stmt.setInt(1, id);
+                
+                try (ResultSet rs = stmt.executeQuery()) {
+                    if (rs.next()) {
+                        return rs.getInt(1) > 0;
+                    }
+                }
+            } catch (SQLException e) {
+                System.err.println("[ProductRepository] existsById: SQL Exception for ID: " + id);
+                e.printStackTrace(System.err);
+            }
+            
+            return false;
         }
-        
-        return false;
     }
     
     /**
@@ -168,20 +283,33 @@ public class ProductRepository implements Repository<Product, Integer> {
      * @return true if no products exist, false otherwise
      */
     public boolean isEmpty() {
-        try (Connection conn = DatabaseUtil.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(COUNT_ALL_SQL);
-             ResultSet rs = stmt.executeQuery()) {
-            
-            if (rs.next()) {
-                return rs.getInt(1) == 0;
+        if (jdbcTemplate != null) {
+            // Use Spring JdbcTemplate
+            try {
+                Integer count = jdbcTemplate.queryForObject(COUNT_ALL_SQL, Integer.class);
+                return count == null || count == 0;
+            } catch (Exception e) {
+                System.err.println("[ProductRepository] isEmpty: Exception");
+                e.printStackTrace(System.err);
+                return true; // Default to true (empty) on error
             }
-        } catch (SQLException e) {
-            System.err.println("[ProductRepository] isEmpty: SQL Exception");
-            e.printStackTrace(System.err);
+        } else {
+            // Fallback to direct JDBC
+            try (Connection conn = DatabaseUtil.getConnection();
+                 PreparedStatement stmt = conn.prepareStatement(COUNT_ALL_SQL);
+                 ResultSet rs = stmt.executeQuery()) {
+                
+                if (rs.next()) {
+                    return rs.getInt(1) == 0;
+                }
+            } catch (SQLException e) {
+                System.err.println("[ProductRepository] isEmpty: SQL Exception");
+                e.printStackTrace(System.err);
+            }
+            
+            // Default to true (empty) on error or if no result
+            return true;
         }
-        
-        // Default to true (empty) on error or if no result
-        return true;
     }
     
     /**
@@ -200,14 +328,21 @@ public class ProductRepository implements Repository<Product, Integer> {
             "    ); " +
             "END;";
 
-        try (Connection conn = DatabaseUtil.getConnection();
-             Statement stmt = conn.createStatement()) {
-            
-            stmt.execute(createTableSQL);
+        if (jdbcTemplate != null) {
+            // Use Spring JdbcTemplate
+            jdbcTemplate.execute(createTableSQL);
             System.out.println("[ProductRepository] createProductsTableIfNotExists: Table checked/created successfully");
-        } catch (SQLException e) {
-            System.err.println("[ProductRepository] createProductsTableIfNotExists: SQL Exception");
-            e.printStackTrace(System.err);
+        } else {
+            // Fallback to direct JDBC
+            try (Connection conn = DatabaseUtil.getConnection();
+                 Statement stmt = conn.createStatement()) {
+                
+                stmt.execute(createTableSQL);
+                System.out.println("[ProductRepository] createProductsTableIfNotExists: Table checked/created successfully");
+            } catch (SQLException e) {
+                System.err.println("[ProductRepository] createProductsTableIfNotExists: SQL Exception");
+                e.printStackTrace(System.err);
+            }
         }
     }
     

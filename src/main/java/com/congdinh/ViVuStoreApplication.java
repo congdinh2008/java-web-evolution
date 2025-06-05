@@ -6,7 +6,8 @@ import java.util.List;
 import java.util.Optional;
 
 import com.congdinh.models.Product;
-import com.congdinh.repositories.ProductRepository;
+import com.congdinh.services.ProductService;
+import com.congdinh.utils.SpringContextLoaderListener;
 
 import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.ServletException;
@@ -20,19 +21,30 @@ import jakarta.servlet.http.HttpServletResponse;
 public class ViVuStoreApplication extends HttpServlet {
     private static final long serialVersionUID = 1L;
     
-    private ProductRepository productRepository;
+    private ProductService productService;
     
     @Override
     public void init() throws ServletException {
-        // Initialize the Product Repository
-        productRepository = new ProductRepository();
+        // Get the ProductService bean from Spring ApplicationContext
+        try {
+            productService = SpringContextLoaderListener.getBean("productService", ProductService.class);
+            System.out.println("[ViVuStoreApplication] init: Obtained ProductService from Spring ApplicationContext");
+        } catch (Exception e) {
+            System.err.println("[ViVuStoreApplication] init: Error getting ProductService from Spring context");
+            e.printStackTrace(System.err);
+            
+            // Fallback to direct instantiation
+            productService = new ProductService();
+            productService.setProductRepository(new com.congdinh.repositories.ProductRepository());
+            System.out.println("[ViVuStoreApplication] init: Created ProductService directly as fallback");
+        }
         
         // Create the Products table if it does not exist
-        productRepository.createProductsTableIfNotExists();
+        productService.createProductsTableIfNotExists();
         System.out.println("[ViVuStoreApplication] init: Products table checked/created.");
         
         // Optionally, initialize sample data if the table is empty
-        productRepository.initializeSampleData();
+        productService.initializeSampleData();
         System.out.println("[ViVuStoreApplication] init: Sample data initialization checked.");
     }
     
@@ -123,7 +135,7 @@ public class ViVuStoreApplication extends HttpServlet {
         request.setAttribute("title", "ViVu Store - Our Products");
         
         try {
-            List<Product> products = productRepository.findAll();
+            List<Product> products = productService.findAllProducts();
             request.setAttribute("products", products);
             System.out.println("[ViVuStoreApplication] handleProductsPage: Found " + products.size() + " products");
             
@@ -156,7 +168,7 @@ public class ViVuStoreApplication extends HttpServlet {
         
         try {
             int productId = Integer.parseInt(productIdParam);
-            Optional<Product> productOpt = productRepository.findById(productId);
+            Optional<Product> productOpt = productService.findProductById(productId);
             
             if (productOpt.isPresent()) {
                 Product product = productOpt.get();
@@ -197,7 +209,7 @@ public class ViVuStoreApplication extends HttpServlet {
             
             // Create and save new product
             Product newProduct = new Product(0, name, unitPrice, unitInStock, thumbnailUrl);
-            Product savedProduct = productRepository.save(newProduct);
+            Product savedProduct = productService.saveProduct(newProduct);
             
             System.out.println("[ViVuStoreApplication] handleAddProduct: Product added successfully with ID: " + savedProduct.getId());
             
@@ -236,13 +248,13 @@ public class ViVuStoreApplication extends HttpServlet {
             // Validate required fields
             if (name == null || name.trim().isEmpty() || thumbnailUrl == null || thumbnailUrl.trim().isEmpty()) {
                 request.setAttribute("errorMessage", "Product name and thumbnail URL are required");
-                request.setAttribute("product", productRepository.findById(id).orElse(new Product()));
+                request.setAttribute("product", productService.findProductById(id).orElse(new Product()));
                 forwardToPage(request, response, "/product-form.jsp");
                 return;
             }
             
             // Check if product exists
-            if (!productRepository.existsById(id)) {
+            if (!productService.productExistsById(id)) {
                 System.err.println("[ViVuStoreApplication] handleUpdateProduct: Product not found with ID: " + id);
                 response.sendRedirect(request.getContextPath() + "/products");
                 return;
@@ -250,7 +262,7 @@ public class ViVuStoreApplication extends HttpServlet {
             
             // Update and save product
             Product updatedProduct = new Product(id, name, unitPrice, unitInStock, thumbnailUrl);
-            productRepository.save(updatedProduct);
+            productService.saveProduct(updatedProduct);
             
             System.out.println("[ViVuStoreApplication] handleUpdateProduct: Product updated successfully with ID: " + id);
             
@@ -281,7 +293,7 @@ public class ViVuStoreApplication extends HttpServlet {
         try {
             int id = Integer.parseInt(request.getParameter("id"));
             
-            boolean deleted = productRepository.deleteById(id);
+            boolean deleted = productService.deleteProductById(id);
             
             if (deleted) {
                 System.out.println("[ViVuStoreApplication] handleDeleteProduct: Product deleted successfully with ID: " + id);
@@ -336,7 +348,7 @@ public class ViVuStoreApplication extends HttpServlet {
         
         try {
             int productId = Integer.parseInt(productIdParam);
-            Optional<Product> productOpt = productRepository.findById(productId);
+            Optional<Product> productOpt = productService.findProductById(productId);
             
             if (productOpt.isPresent()) {
                 Product product = productOpt.get();
