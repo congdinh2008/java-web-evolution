@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/main}">
+<head>
+    <title>Error</title>
+    <th:block layout:fragment="css">
+        <style>
+            .error-container {
+                background-color: white;
+                border-radius: 5px;
+                padding: 30px;
+                text-align: center;
+                box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            }
+            .error-icon {
+                font-size: 5em;
+                color: #e63946;
+                margin-bottom: 20px;
+            }
+            .error-message {
+                font-size: 1.2em;
+                margin-bottom: 15px;
+                color: #e63946;
+            }
+            .error-description {
+                margin-bottom: 30px;
+                color: #555;
+            }
+            .back-button {
+                display: inline-block;
+                padding: 10px 20px;
+                background-color: #333;
+                color: white;
+                text-decoration: none;
+                border-radius: 5px;
+                transition: background-color 0.3s;
+            }
+            .back-button:hover {
+                background-color: #555;
+            }
+        </style>
+    </th:block>
+</head>
+<body>
+    <div layout:fragment="content">
+        <div class="error-container">
+            <div class="error-icon">⚠️</div>
+            <h1>Oops! Something went wrong</h1>
+            <div class="error-message" th:text="${message}">Error message</div>
+            <div class="error-description" th:text="${description}">Error description</div>
+            <a th:href="@{/}" class="back-button">Return to Home Page</a>
+        </div>
+    </div>
+</body>
+</html>
