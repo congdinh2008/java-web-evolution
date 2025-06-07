@@ -18,7 +18,7 @@ import org.springframework.jdbc.datasource.DriverManagerDataSource;
 @Configuration
 @ComponentScan(basePackages = {"com.congdinh.repositories", "com.congdinh.services", "com.congdinh.utils"})
 @PropertySource("classpath:db.properties")
-@Import(HibernateConfig.class)
+@Import({HibernateConfig.class, SecurityConfig.class})
 public class AppConfig {
     
     private final Environment env;

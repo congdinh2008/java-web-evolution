@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" 
-      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
     <title layout:title-pattern="$CONTENT_TITLE - $LAYOUT_TITLE">ViVu Store</title>
@@ -61,6 +62,24 @@
                 <a th:href="@{/products}">Products</a>
                 <a th:href="@{/about}">About Us</a>
                 <a th:href="@{/contact}">Contact</a>
+                
+                <!-- Admin link for users with ADMIN role -->
+                <a th:href="@{/admin/users}" sec:authorize="hasRole('ADMIN')">User Management</a>
+                
+                <!-- Authentication links -->
+                <div style="float: right;">
+                    <!-- Show when user is not authenticated -->
+                    <span sec:authorize="!isAuthenticated()">
+                        <a th:href="@{/login}">Login</a>
+                        <a th:href="@{/register}">Register</a>
+                    </span>
+                    
+                    <!-- Show when user is authenticated -->
+                    <span sec:authorize="isAuthenticated()">
+                        <span>Welcome, <span sec:authentication="name"></span>!</span>
+                        <a th:href="@{/logout}">Logout</a>
+                    </span>
+                </div>
             </nav>
         </div>
     </header>

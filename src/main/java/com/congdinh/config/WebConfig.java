@@ -12,6 +12,7 @@ import org.thymeleaf.spring6.templateresolver.SpringResourceTemplateResolver;
 import org.thymeleaf.spring6.view.ThymeleafViewResolver;
 import org.thymeleaf.templatemode.TemplateMode;
 import nz.net.ultraq.thymeleaf.layoutdialect.LayoutDialect;
+import org.thymeleaf.extras.springsecurity6.dialect.SpringSecurityDialect;
 
 /**
  * Spring MVC Configuration with Thymeleaf
@@ -48,6 +49,9 @@ public class WebConfig implements WebMvcConfigurer {
         
         // Add Layout Dialect for layouts and fragments
         templateEngine.addDialect(new LayoutDialect());
+        
+        // Add Spring Security Dialect for security-specific features
+        templateEngine.addDialect(new SpringSecurityDialect());
         
         return templateEngine;
     }
