@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{shared/layout/layout}">
+<head>
+    <title th:text="${title}">ViVu Store - Product Search</title>
+</head>
+<body>
+    <div layout:fragment="content">
+        <!-- Breadcrumb -->
+        <section class="bg-gray-50 py-4">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <nav class="flex" aria-label="Breadcrumb">
+                    <ol class="flex items-center space-x-4">
+                        <li>
+                            <a th:href="@{/}" class="text-gray-500 hover:text-gray-700">Home</a>
+                        </li>
+                        <li class="flex items-center">
+                            <svg class="flex-shrink-0 h-5 w-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
+                            </svg>
+                            <a th:href="@{/products}" class="ml-4 text-gray-500 hover:text-gray-700">Products</a>
+                        </li>
+                        <li class="flex items-center">
+                            <svg class="flex-shrink-0 h-5 w-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
+                            </svg>
+                            <span class="ml-4 text-gray-700">Search</span>
+                        </li>
+                    </ol>
+                </nav>
+            </div>
+        </section>
+
+        <!-- Page Header -->
+        <section class="bg-gray-50 py-12">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center">
+                    <h1 class="text-4xl font-bold text-gray-900 mb-4">Search Products</h1>
+                    <p class="text-lg text-gray-600 max-w-2xl mx-auto">Find exactly what you're looking for</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Advanced Search Form -->
+        <section class="py-8 bg-white border-b">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <form th:action="@{/products/search}" method="get" class="bg-white shadow-lg rounded-lg p-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                        <!-- Search Query -->
+                        <div class="lg:col-span-2">
+                            <label for="query" class="block text-sm font-medium text-gray-700 mb-2">Search Terms</label>
+                            <div class="relative">
+                                <input type="text" 
+                                       id="query" 
+                                       name="query" 
+                                       th:value="${param.query}"
+                                       placeholder="Search by product name..."
+                                       class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <svg class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Price Range -->
+                        <div>
+                            <label for="minPrice" class="block text-sm font-medium text-gray-700 mb-2">Min Price ($)</label>
+                            <input type="number" 
+                                   id="minPrice" 
+                                   name="minPrice" 
+                                   th:value="${param.minPrice}"
+                                   placeholder="0.00"
+                                   step="0.01"
+                                   min="0"
+                                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                        </div>
+
+                        <div>
+                            <label for="maxPrice" class="block text-sm font-medium text-gray-700 mb-2">Max Price ($)</label>
+                            <input type="number" 
+                                   id="maxPrice" 
+                                   name="maxPrice" 
+                                   th:value="${param.maxPrice}"
+                                   placeholder="999.99"
+                                   step="0.01"
+                                   min="0"
+                                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
+                        <!-- Stock Status -->
+                        <div>
+                            <label for="stockStatus" class="block text-sm font-medium text-gray-700 mb-2">Stock Status</label>
+                            <select id="stockStatus" 
+                                    name="stockStatus" 
+                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                                <option value="">All Products</option>
+                                <option value="inStock" th:selected="${param.stockStatus == 'inStock'}">In Stock</option>
+                                <option value="lowStock" th:selected="${param.stockStatus == 'lowStock'}">Low Stock</option>
+                                <option value="outOfStock" th:selected="${param.stockStatus == 'outOfStock'}">Out of Stock</option>
+                            </select>
+                        </div>
+
+                        <!-- Sort By -->
+                        <div>
+                            <label for="sortBy" class="block text-sm font-medium text-gray-700 mb-2">Sort By</label>
+                            <select id="sortBy" 
+                                    name="sortBy" 
+                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                                <option value="name" th:selected="${param.sortBy == 'name'}">Name</option>
+                                <option value="priceAsc" th:selected="${param.sortBy == 'priceAsc'}">Price (Low to High)</option>
+                                <option value="priceDesc" th:selected="${param.sortBy == 'priceDesc'}">Price (High to Low)</option>
+                                <option value="stock" th:selected="${param.sortBy == 'stock'}">Stock Quantity</option>
+                            </select>
+                        </div>
+
+                        <!-- Search Actions -->
+                        <div class="flex items-end gap-2">
+                            <button type="submit" 
+                                    class="flex-1 bg-indigo-600 text-white py-3 px-6 rounded-lg hover:bg-indigo-700 transition-colors font-medium">
+                                <svg class="h-5 w-5 inline mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                                </svg>
+                                Search
+                            </button>
+                            <a th:href="@{/products/search}" 
+                               class="bg-gray-200 text-gray-800 py-3 px-4 rounded-lg hover:bg-gray-300 transition-colors">
+                                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                                </svg>
+                            </a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+        <!-- Search Results -->
+        <section class="py-12 bg-gray-50">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <!-- Results Summary -->
+                <div th:if="${param.query != null or param.minPrice != null or param.maxPrice != null or param.stockStatus != null}" 
+                     class="mb-8">
+                    <div class="bg-white rounded-lg p-4 shadow-sm border-l-4 border-indigo-500">
+                        <h3 class="text-lg font-medium text-gray-900">Search Results</h3>
+                        <p class="text-gray-600 mt-1">
+                            <span th:if="${products != null}" th:text="${products.size()} + ' products found'">0 products found</span>
+                            <span th:if="${param.query != null and !param.query.isEmpty()}" th:text="' for &quot;' + ${param.query} + '&quot;'"></span>
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Products Grid -->
+                <div th:if="${products != null and !products.isEmpty()}" 
+                     class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                    <div th:each="product : ${products}">
+                        <div th:replace="~{shared/fragments/product-card :: product-card(${product})}"></div>
+                    </div>
+                </div>
+
+                <!-- No Results -->
+                <div th:if="${products != null and products.isEmpty()}" 
+                     class="text-center py-16">
+                    <svg class="mx-auto h-24 w-24 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                    </svg>
+                    <h3 class="mt-4 text-lg font-medium text-gray-900">No products found</h3>
+                    <p class="mt-2 text-gray-500">Try adjusting your search criteria or browse all products.</p>
+                    <div class="mt-6">
+                        <a th:href="@{/products}" class="bg-indigo-600 text-white px-6 py-2 rounded-lg hover:bg-indigo-700 transition-colors">
+                            Browse All Products
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Default State (No Search Performed) -->
+                <div th:if="${products == null}" 
+                     class="text-center py-16">
+                    <svg class="mx-auto h-24 w-24 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                    </svg>
+                    <h3 class="mt-4 text-lg font-medium text-gray-900">Ready to Search</h3>
+                    <p class="mt-2 text-gray-500">Use the search form above to find specific products.</p>
+                    <div class="mt-6">
+                        <a th:href="@{/products}" class="bg-indigo-600 text-white px-6 py-2 rounded-lg hover:bg-indigo-700 transition-colors">
+                            Browse All Products
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+</body>
+</html>

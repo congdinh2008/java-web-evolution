@@ -18,7 +18,7 @@ public class HomeController {
         model.addAttribute("title", "ViVu Store - Home Page");
         model.addAttribute("message", "Welcome to ViVu Store!");
         model.addAttribute("description", "Your one-stop shop for all things ViVu.");
-        return "index";
+        return "home/index";
     }
     
     /**
@@ -27,7 +27,7 @@ public class HomeController {
     @GetMapping("/about")
     public String aboutPage(Model model) {
         model.addAttribute("title", "ViVu Store - About Us");
-        return "about";
+        return "home/about";
     }
     
     /**
@@ -36,6 +36,6 @@ public class HomeController {
     @GetMapping("/contact")
     public String contactPage(Model model) {
         model.addAttribute("title", "ViVu Store - Contact Us");
-        return "contact";
+        return "home/contact";
     }
 }

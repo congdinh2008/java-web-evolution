@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+</head>
+<body>
+    <!-- Product Card Fragment -->
+    <div th:fragment="product-card(product)" class="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300">
+        <div class="p-6">
+            <!-- Product Image Placeholder -->
+            <div class="w-full h-48 bg-gradient-to-r from-indigo-100 to-purple-100 rounded-lg mb-4 flex items-center justify-center">
+                <svg class="h-16 w-16 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                </svg>
+            </div>
+
+            <!-- Product Info -->
+            <h3 class="text-lg font-semibold text-gray-900 mb-2" th:text="${product.name}">Product Name</h3>
+            <p class="text-gray-600 text-sm mb-3 line-clamp-2">High quality product available in our store</p>
+            
+            <!-- Price and Stock -->
+            <div class="flex justify-between items-center mb-4">
+                <span class="text-2xl font-bold text-indigo-600" th:text="'$' + ${#numbers.formatDecimal(product.unitPrice, 1, 2)}">$99.99</span>
+                <span class="text-sm px-2 py-1 rounded-full"
+                      th:classappend="${product.unitInStock > 10 ? 'bg-green-100 text-green-800' : (product.unitInStock > 0 ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800')}"
+                      th:text="${product.unitInStock > 0 ? 'In Stock (' + product.unitInStock + ')' : 'Out of Stock'}">In Stock</span>
+            </div>
+
+            <!-- Actions -->
+            <div class="flex space-x-2">
+                <a th:href="@{/products/details(id=${product.id})}" 
+                   class="flex-1 bg-indigo-600 text-white text-center py-2 px-4 rounded-md hover:bg-indigo-700 transition-colors text-sm font-medium">
+                    View Details
+                </a>
+                <button th:if="${product.unitInStock > 0}"
+                        class="bg-gray-200 text-gray-800 py-2 px-4 rounded-md hover:bg-gray-300 transition-colors text-sm font-medium"
+                        onclick="addToCart(this)"
+                        th:data-product-id="${product.id}">
+                    Add to Cart
+                </button>
+                <button th:if="${product.unitInStock <= 0}"
+                        class="bg-gray-100 text-gray-400 py-2 px-4 rounded-md cursor-not-allowed text-sm font-medium"
+                        disabled>
+                    Out of Stock
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add to Cart Script -->
+    <script th:fragment="product-card-script">
+        function addToCart(button) {
+            const productId = button.getAttribute('data-product-id');
+            
+            // Simple cart simulation
+            button.innerHTML = 'Added!';
+            button.classList.remove('bg-gray-200', 'hover:bg-gray-300');
+            button.classList.add('bg-green-500', 'text-white');
+            
+            setTimeout(() => {
+                button.innerHTML = 'Add to Cart';
+                button.classList.remove('bg-green-500', 'text-white');
+                button.classList.add('bg-gray-200', 'hover:bg-gray-300');
+            }, 2000);
+            
+            console.log('Added product ' + productId + ' to cart');
+        }
+    </script>
+</body>
+</html>

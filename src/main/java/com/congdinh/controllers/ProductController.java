@@ -43,7 +43,7 @@ public class ProductController {
             model.addAttribute("title", "ViVu Store - Our Products");
             System.out.println("[ProductController] listProducts: Found " + products.size() + " products");
             
-            return "products";
+            return "product/list";
         } catch (Exception e) {
             System.err.println("[ProductController] listProducts: Error getting products");
             e.printStackTrace(System.err);
@@ -52,7 +52,7 @@ public class ProductController {
             model.addAttribute("description", "Please try again later or contact support.");
             model.addAttribute("products", new ArrayList<ProductDTO>());
             
-            return "index";
+            return "home/index";
         }
     }
     
@@ -69,7 +69,7 @@ public class ProductController {
                 model.addAttribute("product", product);
                 model.addAttribute("title", "ViVu Store - " + product.getName());
                 
-                return "product-details";
+                return "product/details";
             } else {
                 // Product not found, redirect to products page
                 System.out.println("[ProductController] viewProductDetails: Product not found with ID: " + productId);
@@ -92,7 +92,7 @@ public class ProductController {
         ProductDTO newProduct = new ProductDTO();
         newProduct.setId(0); // Explicitly set ID to 0 for new products
         model.addAttribute("product", newProduct);
-        return "product-form";
+        return "product/form";
     }
     
     /**
@@ -106,7 +106,7 @@ public class ProductController {
                 product.getThumbnailUrl() == null || product.getThumbnailUrl().trim().isEmpty()) {
                 
                 model.addAttribute("errorMessage", "Product name and thumbnail URL are required");
-                return "product-form";
+                return "product/form";
             }
             
             // Save new product
@@ -121,7 +121,7 @@ public class ProductController {
             e.printStackTrace(System.err);
             
             model.addAttribute("errorMessage", "Error adding product. Please try again.");
-            return "product-form";
+            return "product/form";
         }
     }
     
@@ -138,7 +138,7 @@ public class ProductController {
                 model.addAttribute("product", product);
                 model.addAttribute("title", "ViVu Store - Edit " + product.getName());
                 
-                return "product-form";
+                return "product/form";
             } else {
                 // Product not found, redirect to products page
                 System.out.println("[ProductController] showEditProductForm: Product not found with ID: " + productId);
@@ -162,7 +162,7 @@ public class ProductController {
                 product.getThumbnailUrl() == null || product.getThumbnailUrl().trim().isEmpty()) {
                 
                 model.addAttribute("errorMessage", "Product name and thumbnail URL are required");
-                return "product-form";
+                return "product/form";
             }
             
             // Check if product exists
@@ -184,7 +184,7 @@ public class ProductController {
             
             model.addAttribute("errorMessage", "Error updating product. Please try again.");
             model.addAttribute("product", product);
-            return "product-form";
+            return "product/form";
         }
     }
     
@@ -250,7 +250,7 @@ public class ProductController {
             model.addAttribute("direction", direction);
             model.addAttribute("title", "ViVu Store - Search Results");
             
-            return "product-search";
+            return "product/search";
         } catch (Exception e) {
             System.err.println("[ProductController] searchProducts: Error searching products");
             e.printStackTrace(System.err);
@@ -272,7 +272,7 @@ public class ProductController {
             model.addAttribute("threshold", threshold);
             model.addAttribute("title", "ViVu Store - Low Stock Products");
             
-            return "low-stock-products";
+            return "product/low-stock";
         } catch (Exception e) {
             System.err.println("[ProductController] getLowStockProducts: Error getting low stock products");
             e.printStackTrace(System.err);

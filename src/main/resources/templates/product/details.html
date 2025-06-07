@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{shared/layout/layout}">
+<head>
+    <title th:text="${title}">ViVu Store - Product Details</title>
+</head>
+<body>
+    <div layout:fragment="content">
+        <!-- Breadcrumb -->
+        <section class="bg-gray-50 py-4">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <nav class="flex" aria-label="Breadcrumb">
+                    <ol class="flex items-center space-x-4">
+                        <li>
+                            <a th:href="@{/}" class="text-gray-500 hover:text-gray-700">Home</a>
+                        </li>
+                        <li class="flex items-center">
+                            <svg class="flex-shrink-0 h-5 w-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
+                            </svg>
+                            <a th:href="@{/products}" class="ml-4 text-gray-500 hover:text-gray-700">Products</a>
+                        </li>
+                        <li class="flex items-center">
+                            <svg class="flex-shrink-0 h-5 w-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
+                            </svg>
+                            <span class="ml-4 text-gray-700" th:text="${product?.name ?: 'Product Details'}">Product Name</span>
+                        </li>
+                    </ol>
+                </nav>
+            </div>
+        </section>
+
+        <!-- Product Details -->
+        <section class="py-12 bg-white" th:if="${product != null}">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                    <!-- Product Image -->
+                    <div>
+                        <div class="w-full h-96 bg-gradient-to-r from-indigo-100 to-purple-100 rounded-lg flex items-center justify-center mb-4">
+                            <svg class="h-32 w-32 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                            </svg>
+                        </div>
+                        
+                        <!-- Thumbnail gallery -->
+                        <div class="grid grid-cols-4 gap-2">
+                            <div class="h-20 bg-gradient-to-r from-indigo-50 to-purple-50 rounded border-2 border-indigo-200 flex items-center justify-center">
+                                <svg class="h-8 w-8 text-indigo-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                                </svg>
+                            </div>
+                            <div class="h-20 bg-gradient-to-r from-indigo-50 to-purple-50 rounded border flex items-center justify-center cursor-pointer hover:border-indigo-200">
+                                <svg class="h-8 w-8 text-indigo-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                                </svg>
+                            </div>
+                            <div class="h-20 bg-gradient-to-r from-indigo-50 to-purple-50 rounded border flex items-center justify-center cursor-pointer hover:border-indigo-200">
+                                <svg class="h-8 w-8 text-indigo-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                                </svg>
+                            </div>
+                            <div class="h-20 bg-gradient-to-r from-indigo-50 to-purple-50 rounded border flex items-center justify-center cursor-pointer hover:border-indigo-200">
+                                <svg class="h-8 w-8 text-indigo-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Product Information -->
+                    <div>
+                        <h1 class="text-3xl font-bold text-gray-900 mb-4" th:text="${product.name}">Product Name</h1>
+                        
+                        <!-- Price and Stock -->
+                        <div class="flex items-center justify-between mb-6">
+                            <span class="text-4xl font-bold text-indigo-600" th:text="'$' + ${#numbers.formatDecimal(product.unitPrice, 1, 2)}">$99.99</span>
+                            <span class="text-lg px-3 py-1 rounded-full"
+                                  th:classappend="${product.unitInStock > 10 ? 'bg-green-100 text-green-800' : (product.unitInStock > 0 ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800')}"
+                                  th:text="${product.unitInStock > 0 ? 'In Stock (' + product.unitInStock + ')' : 'Out of Stock'}">In Stock</span>
+                        </div>
+
+                        <!-- Product Description -->
+                        <div class="mb-6">
+                            <h3 class="text-lg font-semibold text-gray-900 mb-2">Description</h3>
+                            <p class="text-gray-600 leading-relaxed">
+                                This is a high-quality product with excellent features and specifications. Perfect for your needs with reliable performance and durability.
+                            </p>
+                        </div>
+
+                        <!-- Product Details -->
+                        <div class="mb-6">
+                            <h3 class="text-lg font-semibold text-gray-900 mb-3">Product Details</h3>
+                            <dl class="grid grid-cols-1 gap-2">
+                                <div class="flex">
+                                    <dt class="text-sm font-medium text-gray-500 w-24">ID:</dt>
+                                    <dd class="text-sm text-gray-900" th:text="${product.id}">001</dd>
+                                </div>
+                                <div class="flex">
+                                    <dt class="text-sm font-medium text-gray-500 w-24">Category:</dt>
+                                    <dd class="text-sm text-gray-900">General</dd>
+                                </div>
+                                <div class="flex">
+                                    <dt class="text-sm font-medium text-gray-500 w-24">SKU:</dt>
+                                    <dd class="text-sm text-gray-900" th:text="'SKU-' + ${product.id}">SKU-001</dd>
+                                </div>
+                            </dl>
+                        </div>
+
+                        <!-- Quantity Selector -->
+                        <div class="mb-6" th:if="${product.unitInStock > 0}">
+                            <label for="quantity" class="text-sm font-medium text-gray-700 mb-2 block">Quantity</label>
+                            <div class="flex items-center space-x-3">
+                                <button class="bg-gray-200 text-gray-600 hover:bg-gray-300 w-8 h-8 rounded-full flex items-center justify-center" onclick="decreaseQuantity()">-</button>
+                                <input type="number" id="quantity" name="quantity" min="1" th:max="${product.unitInStock}" value="1"
+                                       class="w-16 text-center border border-gray-300 rounded-md py-1">
+                                <button class="bg-gray-200 text-gray-600 hover:bg-gray-300 w-8 h-8 rounded-full flex items-center justify-center" onclick="increaseQuantity()">+</button>
+                                <span class="text-sm text-gray-500" th:text="'Max: ' + ${product.unitInStock}">Max: 10</span>
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="flex space-x-4 mb-6">
+                            <button th:if="${product.unitInStock > 0}"
+                                    class="flex-1 bg-indigo-600 text-white py-3 px-6 rounded-lg hover:bg-indigo-700 transition-colors font-medium"
+                                    onclick="addToCart()">
+                                Add to Cart
+                            </button>
+                            <button th:if="${product.unitInStock <= 0}"
+                                    class="flex-1 bg-gray-300 text-gray-500 py-3 px-6 rounded-lg cursor-not-allowed font-medium"
+                                    disabled>
+                                Out of Stock
+                            </button>
+                            <button class="bg-gray-200 text-gray-800 py-3 px-6 rounded-lg hover:bg-gray-300 transition-colors font-medium">
+                                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+                                </svg>
+                            </button>
+                        </div>
+
+                        <!-- Additional Information -->
+                        <div class="border-t pt-6">
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                                <div class="flex items-center">
+                                    <svg class="h-5 w-5 text-green-500 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                    </svg>
+                                    <span class="text-gray-600">Free Shipping</span>
+                                </div>
+                                <div class="flex items-center">
+                                    <svg class="h-5 w-5 text-green-500 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                    </svg>
+                                    <span class="text-gray-600">30-Day Returns</span>
+                                </div>
+                                <div class="flex items-center">
+                                    <svg class="h-5 w-5 text-green-500 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                                    </svg>
+                                    <span class="text-gray-600">Secure Payment</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Product Not Found -->
+        <section class="py-16 bg-white text-center" th:if="${product == null}">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <svg class="mx-auto h-24 w-24 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                </svg>
+                <h3 class="mt-4 text-lg font-medium text-gray-900">Product not found</h3>
+                <p class="mt-2 text-gray-500">The product you're looking for doesn't exist or has been removed.</p>
+                <div class="mt-6">
+                    <a th:href="@{/products}" class="bg-indigo-600 text-white px-6 py-2 rounded-lg hover:bg-indigo-700 transition-colors">
+                        Browse Products
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <script>
+            function increaseQuantity() {
+                const input = document.getElementById('quantity');
+                const max = parseInt(input.max);
+                const current = parseInt(input.value);
+                if (current < max) {
+                    input.value = current + 1;
+                }
+            }
+
+            function decreaseQuantity() {
+                const input = document.getElementById('quantity');
+                const current = parseInt(input.value);
+                if (current > 1) {
+                    input.value = current - 1;
+                }
+            }
+
+            function addToCart() {
+                const quantity = document.getElementById('quantity').value;
+                const button = event.target;
+                
+                button.innerHTML = 'Added to Cart!';
+                button.classList.remove('bg-indigo-600', 'hover:bg-indigo-700');
+                button.classList.add('bg-green-500');
+                
+                setTimeout(() => {
+                    button.innerHTML = 'Add to Cart';
+                    button.classList.remove('bg-green-500');
+                    button.classList.add('bg-indigo-600', 'hover:bg-indigo-700');
+                }, 2000);
+                
+                console.log('Added ' + quantity + ' items to cart');
+            }
+        </script>
+    </div>
+</body>
+</html>
