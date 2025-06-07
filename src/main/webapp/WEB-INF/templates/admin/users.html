@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      layout:decorate="~{layout/main}">
+<head>
+    <title th:text="${title}">User Management</title>
+    <style>
+        .admin-container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        .user-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        .user-table th,
+        .user-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        .user-table th {
+            background-color: #f8f9fa;
+            font-weight: bold;
+        }
+        .user-table tr:hover {
+            background-color: #f5f5f5;
+        }
+        .badge {
+            display: inline-block;
+            padding: 3px 8px;
+            font-size: 0.75em;
+            font-weight: bold;
+            color: white;
+            background-color: #007bff;
+            border-radius: 3px;
+            margin-right: 5px;
+        }
+        .badge-admin {
+            background-color: #dc3545;
+        }
+        .badge-user {
+            background-color: #28a745;
+        }
+        .btn {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 0.875em;
+        }
+        .btn-info {
+            background-color: #17a2b8;
+            color: white;
+        }
+        .btn-info:hover {
+            background-color: #138496;
+        }
+        .no-users {
+            text-align: center;
+            color: #666;
+            font-style: italic;
+            padding: 40px;
+        }
+    </style>
+</head>
+<body>
+    <div layout:fragment="content">
+        <!-- Only show content if user has ADMIN role -->
+        <div sec:authorize="hasRole('ADMIN')">
+            <div class="admin-container">
+                <h1>User Management</h1>
+                <p>Manage all registered users in the system.</p>
+                
+                <div th:if="${users != null and !users.isEmpty()}">
+                    <table class="user-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Phone Number</th>
+                                <th>Date of Birth</th>
+                                <th>Address</th>
+                                <th>Roles</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="user : ${users}">
+                                <td th:text="${user.id}">1</td>
+                                <td th:text="${user.firstName + ' ' + user.lastName}">John Doe</td>
+                                <td th:text="${user.phoneNumber}">0123456789</td>
+                                <td th:text="${user.dateOfBirth != null ? #temporals.format(user.dateOfBirth, 'dd/MM/yyyy') : 'N/A'}">01/01/1990</td>
+                                <td th:text="${user.address ?: 'N/A'}">123 Main St</td>
+                                <td>
+                                    <span th:each="role : ${user.roles}" 
+                                          th:classappend="${role.name == 'ROLE_ADMIN'} ? 'badge-admin' : 'badge-user'"
+                                          class="badge" 
+                                          th:text="${role.name}">ROLE_USER</span>
+                                </td>
+                                <td>
+                                    <a th:href="@{/admin/users/{id}(id=${user.id})}" class="btn btn-info">View Details</a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div th:if="${users == null or users.isEmpty()}" class="no-users">
+                    <p>No users found in the system.</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Show access denied message if user doesn't have ADMIN role -->
+        <div sec:authorize="!hasRole('ADMIN')">
+            <div class="admin-container">
+                <h1>Access Denied</h1>
+                <p>You don't have permission to access this page. Admin privileges are required.</p>
+                <a th:href="@{/}" class="btn btn-info">Return to Home</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

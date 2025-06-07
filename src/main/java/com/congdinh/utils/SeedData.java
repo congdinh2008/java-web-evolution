@@ -11,6 +11,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.congdinh.models.Product;
 import com.congdinh.repositories.ProductJPARepository;
+import com.congdinh.services.RoleService;
+import com.congdinh.services.UserService;
+import com.congdinh.dto.UserRegistrationDto;
+
+import java.time.LocalDate;
 
 /**
  * Component to seed initial data into the database
@@ -20,10 +25,14 @@ import com.congdinh.repositories.ProductJPARepository;
 public class SeedData {
     
     private final ProductJPARepository productRepository;
+    private final RoleService roleService;
+    private final UserService userService;
     
     @Autowired
-    public SeedData(ProductJPARepository productRepository) {
+    public SeedData(ProductJPARepository productRepository, RoleService roleService, UserService userService) {
         this.productRepository = productRepository;
+        this.roleService = roleService;
+        this.userService = userService;
     }
     
     /**
@@ -32,7 +41,9 @@ public class SeedData {
     @EventListener
     @Transactional
     public void seed(ContextRefreshedEvent event) {
+        initializeRoles();
         initializeSampleData();
+        initializeAdminUser();
     }
     
     /**
@@ -60,6 +71,52 @@ public class SeedData {
             System.out.println("[SeedData] initializeSampleData: Added " + sampleProducts.size() + " sample products");
         } else {
             System.out.println("[SeedData] initializeSampleData: Table already has data, skipping");
+        }
+    }
+    
+    /**
+     * Initialize default roles if they don't exist
+     */
+    private void initializeRoles() {
+        System.out.println("[SeedData] initializeRoles: Creating default roles");
+        roleService.createDefaultRoles();
+        System.out.println("[SeedData] initializeRoles: Default roles created successfully");
+    }
+    
+    /**
+     * Initialize admin user if it doesn't exist
+     */
+    private void initializeAdminUser() {
+        String adminPhoneNumber = "0123456789";
+        
+        if (!userService.existsByPhoneNumber(adminPhoneNumber)) {
+            System.out.println("[SeedData] initializeAdminUser: Creating admin user");
+            
+            try {
+                UserRegistrationDto adminUser = new UserRegistrationDto(
+                    "Admin",
+                    "User",
+                    adminPhoneNumber,
+                    "admin123",
+                    "admin123",
+                    LocalDate.of(1990, 1, 1),
+                    "Admin Address"
+                );
+                
+                userService.registerUser(adminUser);
+                
+                // Add admin role to the user
+                Long userId = userService.findUserByPhoneNumber(adminPhoneNumber).get().getId();
+                Long adminRoleId = roleService.findRoleByName("ROLE_ADMIN").get().getId();
+                userService.addRoleToUser(userId, adminRoleId);
+                
+                System.out.println("[SeedData] initializeAdminUser: Admin user created successfully");
+                System.out.println("[SeedData] initializeAdminUser: Admin credentials - Phone: " + adminPhoneNumber + ", Password: admin123");
+            } catch (Exception e) {
+                System.err.println("[SeedData] initializeAdminUser: Failed to create admin user: " + e.getMessage());
+            }
+        } else {
+            System.out.println("[SeedData] initializeAdminUser: Admin user already exists, skipping");
         }
     }
 }
