@@ -1,121 +1,87 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<html xmlns:th="http://www.thymeleaf.org" 
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{shared/layout/admin}" 
+      lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title th:text="${title}">Admin - Product Form</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <title th:text="${title} ?: (${isEdit} ? 'Edit Product - Admin Panel' : 'Add Product - Admin Panel')">Product Form - Admin Panel</title>
 </head>
-<body class="bg-gray-100">
-    <!-- Navigation Bar -->
-    <nav class="bg-white shadow-lg">
-        <div class="max-w-7xl mx-auto px-4">
-            <div class="flex justify-between h-16">
+
+<div layout:fragment="content">
+    <!-- Breadcrumb -->
+    <nav class="flex mb-6" aria-label="Breadcrumb">
+        <ol class="inline-flex items-center space-x-1 md:space-x-3">
+            <li class="inline-flex items-center">
+                <a href="/admin" class="text-gray-700 hover:text-blue-600">
+                    <i class="fas fa-home mr-2"></i>Admin
+                </a>
+            </li>
+            <li>
                 <div class="flex items-center">
-                    <a href="/admin" class="flex items-center space-x-2">
-                        <i class="fas fa-store text-blue-600 text-xl"></i>
-                        <span class="font-bold text-xl text-gray-800">Admin Panel</span>
-                    </a>
+                    <i class="fas fa-chevron-right text-gray-400 mx-2"></i>
+                    <a href="/admin/products" class="text-gray-700 hover:text-blue-600">Products</a>
                 </div>
-                <div class="flex items-center space-x-4">
-                    <a href="/admin/categories" class="text-gray-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium">
-                        <i class="fas fa-tags mr-1"></i>Categories
-                    </a>
-                    <a href="/admin/products" class="bg-blue-600 text-white px-3 py-2 rounded-md text-sm font-medium">
-                        <i class="fas fa-box mr-1"></i>Products
-                    </a>
-                    <a href="/" class="text-gray-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium">
-                        <i class="fas fa-home mr-1"></i>Home
-                    </a>
+            </li>
+            <li aria-current="page">
+                <div class="flex items-center">
+                    <i class="fas fa-chevron-right text-gray-400 mx-2"></i>
+                    <span class="text-gray-500" th:text="${isEdit ? 'Edit Product' : 'Add Product'}">Add Product</span>
                 </div>
-            </div>
-        </div>
+            </li>
+        </ol>
     </nav>
 
-    <!-- Main Content -->
-    <div class="max-w-4xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-        <!-- Breadcrumb -->
-        <nav class="flex mb-6" aria-label="Breadcrumb">
-            <ol class="inline-flex items-center space-x-1 md:space-x-3">
-                <li class="inline-flex items-center">
-                    <a href="/admin" class="text-gray-700 hover:text-blue-600">
-                        <i class="fas fa-home mr-2"></i>Admin
-                    </a>
-                </li>
-                <li>
-                    <div class="flex items-center">
-                        <i class="fas fa-chevron-right text-gray-400 mx-2"></i>
-                        <a href="/admin/products" class="text-gray-700 hover:text-blue-600">Products</a>
-                    </div>
-                </li>
-                <li aria-current="page">
-                    <div class="flex items-center">
-                        <i class="fas fa-chevron-right text-gray-400 mx-2"></i>
-                        <span class="text-gray-500" th:text="${isEdit ? 'Edit Product' : 'Add Product'}">Add Product</span>
-                    </div>
-                </li>
-            </ol>
-        </nav>
+    <!-- Header -->
+    <div class="mb-6">
+        <h1 class="text-3xl font-bold text-gray-900" th:text="${isEdit ? 'Edit Product' : 'Add New Product'}">Add New Product</h1>
+        <p class="mt-2 text-gray-600" th:text="${isEdit ? 'Update product information' : 'Create a new product in your catalog'}">Create a new product in your catalog</p>
+    </div>
 
-        <!-- Header -->
-        <div class="mb-6">
-            <h1 class="text-3xl font-bold text-gray-900" th:text="${isEdit ? 'Edit Product' : 'Add New Product'}">Add New Product</h1>
-            <p class="mt-2 text-gray-600" th:text="${isEdit ? 'Update product information' : 'Create a new product in your catalog'}">Create a new product in your catalog</p>
-        </div>
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Form -->
+        <div class="lg:col-span-2">
+            <div class="bg-white shadow-lg rounded-lg overflow-hidden">
+                <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
+                    <h3 class="text-lg font-medium text-gray-900">Product Information</h3>
+                    <p class="mt-1 text-sm text-gray-600">Fill in the product details below</p>
+                </div>
 
-        <!-- Flash Messages -->
-        <div th:if="${successMessage}" class="mb-4 p-4 bg-green-100 border border-green-400 text-green-700 rounded-md">
-            <div class="flex items-center">
-                <i class="fas fa-check-circle mr-2"></i>
-                <span th:text="${successMessage}"></span>
-            </div>
-        </div>
-
-        <div th:if="${errorMessage}" class="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded-md">
-            <div class="flex items-center">
-                <i class="fas fa-exclamation-circle mr-2"></i>
-                <span th:text="${errorMessage}"></span>
-            </div>
-        </div>
-
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <!-- Form -->
-            <div class="lg:col-span-2">
-                <div class="bg-white shadow-lg rounded-lg overflow-hidden">
-                    <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
-                        <h3 class="text-lg font-medium text-gray-900">Product Information</h3>
-                        <p class="mt-1 text-sm text-gray-600">Fill in the product details below</p>
-                    </div>
-
-                    <form th:action="${isEdit ? '/admin/products/update' : '/admin/products/add'}" 
-                          th:object="${product}" 
-                          method="POST" 
-                          class="p-6 space-y-6"
-                          novalidate>
-                        
-                        <!-- Hidden ID field for edit -->
-                        <input th:if="${isEdit}" type="hidden" th:field="*{id}">
-                        
-                        <!-- Product Name -->
-                        <div>
-                            <label for="name" class="block text-sm font-medium text-gray-700 mb-2">
-                                Product Name <span class="text-red-500">*</span>
-                            </label>
-                            <input type="text" 
-                                   id="name" 
-                                   th:field="*{name}"
-                                   required
-                                   class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                                   placeholder="Enter product name">
-                            <p class="mt-1 text-sm text-gray-500">Choose a clear, descriptive name for your product</p>
+                <form th:action="${isEdit ? '/admin/products/update' : '/admin/products/add'}" 
+                      th:object="${product}" 
+                      method="POST" 
+                      class="p-6 space-y-6"
+                      novalidate>
+                    
+                    <!-- Hidden ID field for edit -->
+                    <input th:if="${isEdit}" type="hidden" th:field="*{id}">
+                    
+                    <!-- Product Name -->
+                    <div>
+                        <label for="name" class="block text-sm font-medium text-gray-700 mb-2">
+                            Product Name <span class="text-red-500">*</span>
+                        </label>
+                        <input type="text" 
+                               id="name" 
+                               th:field="*{name}"
+                               th:class="${#fields.hasErrors('name')} ? 'w-full px-3 py-2 border-2 border-red-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500' : 'w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500'"
+                               placeholder="Enter product name"
+                               maxlength="200"
+                               required>
+                        <div th:if="${#fields.hasErrors('name')}" class="mt-1 text-sm text-red-600">
+                            <ul class="list-disc list-inside">
+                                <li th:each="error : ${#fields.errors('name')}" th:text="${error}"></li>
+                            </ul>
                         </div>
+                        <p class="mt-1 text-sm text-gray-500">Maximum 200 characters</p>
+                    </div>
 
-                        <!-- Unit Price -->
+                    <!-- Price and Stock Row -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- Price -->
                         <div>
                             <label for="unitPrice" class="block text-sm font-medium text-gray-700 mb-2">
-                                Unit Price ($) <span class="text-red-500">*</span>
+                                Price <span class="text-red-500">*</span>
                             </label>
                             <div class="relative">
                                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -124,290 +90,334 @@
                                 <input type="number" 
                                        id="unitPrice" 
                                        th:field="*{unitPrice}"
+                                       th:class="${#fields.hasErrors('unitPrice')} ? 'w-full pl-7 pr-3 py-2 border-2 border-red-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500' : 'w-full pl-7 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500'"
+                                       placeholder="0.00"
                                        step="0.01"
                                        min="0"
-                                       required
-                                       class="w-full pl-8 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                                       placeholder="0.00">
+                                       required>
                             </div>
-                            <p class="mt-1 text-sm text-gray-500">Set the selling price for this product</p>
+                            <div th:if="${#fields.hasErrors('unitPrice')}" class="mt-1 text-sm text-red-600">
+                                <ul class="list-disc list-inside">
+                                    <li th:each="error : ${#fields.errors('unitPrice')}" th:text="${error}"></li>
+                                </ul>
+                            </div>
                         </div>
 
-                        <!-- Units in Stock -->
+                        <!-- Stock -->
                         <div>
                             <label for="unitInStock" class="block text-sm font-medium text-gray-700 mb-2">
-                                Units in Stock <span class="text-red-500">*</span>
+                                Stock Quantity <span class="text-red-500">*</span>
                             </label>
                             <input type="number" 
                                    id="unitInStock" 
                                    th:field="*{unitInStock}"
+                                   th:class="${#fields.hasErrors('unitInStock')} ? 'w-full px-3 py-2 border-2 border-red-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500' : 'w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500'"
+                                   placeholder="0"
                                    min="0"
-                                   required
-                                   class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                                   placeholder="0">
-                            <p class="mt-1 text-sm text-gray-500">Current inventory count for this product</p>
-                        </div>
-
-                        <!-- Category -->
-                        <div>
-                            <label for="categoryId" class="block text-sm font-medium text-gray-700 mb-2">
-                                Category
-                            </label>
-                            <select id="categoryId" 
-                                    th:field="*{categoryId}"
-                                    class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
-                                <option value="">Select a category (optional)</option>
-                                <option th:each="category : ${categories}" 
-                                        th:value="${category.id}" 
-                                        th:text="${category.name}"
-                                        th:selected="${product.categoryId == category.id}">Category Name</option>
-                            </select>
-                            <p class="mt-1 text-sm text-gray-500">Choose a category to organize your product</p>
-                        </div>
-
-                        <!-- Thumbnail URL -->
-                        <div>
-                            <label for="thumbnailUrl" class="block text-sm font-medium text-gray-700 mb-2">
-                                Thumbnail URL <span class="text-red-500">*</span>
-                            </label>
-                            <input type="url" 
-                                   id="thumbnailUrl" 
-                                   th:field="*{thumbnailUrl}"
-                                   required
-                                   class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                                   placeholder="https://example.com/product-image.jpg"
-                                   onchange="updateImagePreview()">
-                            <p class="mt-1 text-sm text-gray-500">Provide a direct link to the product image</p>
-                        </div>
-
-                        <!-- Image Preview -->
-                        <div id="imagePreview" class="hidden">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Image Preview</label>
-                            <div class="border border-gray-300 rounded-md p-4 bg-gray-50">
-                                <img id="previewImg" src="" alt="Product preview" class="max-w-full h-32 object-cover rounded-md mx-auto">
+                                   required>
+                            <div th:if="${#fields.hasErrors('unitInStock')}" class="mt-1 text-sm text-red-600">
+                                <ul class="list-disc list-inside">
+                                    <li th:each="error : ${#fields.errors('unitInStock')}" th:text="${error}"></li>
+                                </ul>
                             </div>
                         </div>
+                    </div>
 
-                        <!-- Form Actions -->
-                        <div class="flex items-center justify-end space-x-4 pt-6 border-t border-gray-200">
-                            <a href="/admin/products" 
-                               class="px-6 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors">
-                                Cancel
-                            </a>
+                    <!-- Category -->
+                    <div>
+                        <label for="categoryId" class="block text-sm font-medium text-gray-700 mb-2">
+                            Category <span class="text-red-500">*</span>
+                        </label>
+                        <select id="categoryId" 
+                                th:field="*{categoryId}"
+                                th:class="${#fields.hasErrors('categoryId')} ? 'w-full px-3 py-2 border-2 border-red-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500' : 'w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500'"
+                                required>
+                            <option value="">Select a category</option>
+                            <option th:each="category : ${categories}" 
+                                    th:value="${category.id}" 
+                                    th:text="${category.name}"
+                                    th:selected="${category.id == product.categoryId}">Category Name</option>
+                        </select>
+                        <div th:if="${#fields.hasErrors('categoryId')}" class="mt-1 text-sm text-red-600">
+                            <ul class="list-disc list-inside">
+                                <li th:each="error : ${#fields.errors('categoryId')}" th:text="${error}"></li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Image URL -->
+                    <div>
+                        <label for="thumbnailUrl" class="block text-sm font-medium text-gray-700 mb-2">
+                            Product Image URL <span class="text-red-500">*</span>
+                        </label>
+                        <input type="url" 
+                               id="thumbnailUrl" 
+                               th:field="*{thumbnailUrl}"
+                               th:class="${#fields.hasErrors('thumbnailUrl')} ? 'w-full px-3 py-2 border-2 border-red-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500' : 'w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500'"
+                               placeholder="https://example.com/image.jpg"
+                               required>
+                        <div th:if="${#fields.hasErrors('thumbnailUrl')}" class="mt-1 text-sm text-red-600">
+                            <ul class="list-disc list-inside">
+                                <li th:each="error : ${#fields.errors('thumbnailUrl')}" th:text="${error}"></li>
+                            </ul>
+                        </div>
+                        <p class="mt-1 text-sm text-gray-500">Enter the URL of the product image</p>
+                        
+                        <!-- Image Preview -->
+                        <div th:if="${product.thumbnailUrl != null and !#strings.isEmpty(product.thumbnailUrl)}" class="mt-3">
+                            <p class="text-sm text-gray-600">Current image:</p>
+                            <img th:src="${product.thumbnailUrl}" th:alt="${product.name}" class="mt-1 h-20 w-20 object-cover rounded-md border">
+                        </div>
+                    </div>
+
+                    <!-- Form Actions -->
+                    <div class="flex items-center justify-between pt-4 border-t border-gray-200">
+                        <a href="/admin/products" 
+                           class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors">
+                            <i class="fas fa-arrow-left mr-2"></i>
+                            Back to Products
+                        </a>
+                        <div class="flex space-x-3">
+                            <button type="button" 
+                                    onclick="resetForm()"
+                                    class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors">
+                                <i class="fas fa-undo mr-2"></i>
+                                Reset
+                            </button>
                             <button type="submit" 
-                                    class="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors">
-                                <i th:class="${isEdit ? 'fas fa-save' : 'fas fa-plus'}" class="mr-2"></i>
-                                <span th:text="${isEdit ? 'Update Product' : 'Add Product'}">Add Product</span>
+                                    class="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors">
+                                <i class="fas fa-save mr-2"></i>
+                                <span th:text="${isEdit ? 'Update Product' : 'Create Product'}">Create Product</span>
                             </button>
                         </div>
-                    </form>
-                </div>
-            </div>
-
-            <!-- Help Section -->
-            <div class="lg:col-span-1">
-                <div class="bg-white shadow-lg rounded-lg overflow-hidden">
-                    <div class="px-6 py-4 border-b border-gray-200 bg-blue-50">
-                        <h3 class="text-lg font-medium text-blue-900">
-                            <i class="fas fa-lightbulb mr-2"></i>Tips & Guidelines
-                        </h3>
                     </div>
-                    <div class="p-6 space-y-4">
-                        <div class="border-l-4 border-blue-500 pl-4">
-                            <h4 class="font-medium text-gray-900">Product Name</h4>
-                            <p class="text-sm text-gray-600 mt-1">Use clear, descriptive names that customers will search for. Include key features or brand names.</p>
+                </form>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="lg:col-span-1">
+            <div class="space-y-6">
+                <!-- Help Card -->
+                <div class="bg-blue-50 border border-blue-200 rounded-lg p-6">
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-info-circle text-blue-400 text-xl"></i>
                         </div>
-                        
-                        <div class="border-l-4 border-green-500 pl-4">
-                            <h4 class="font-medium text-gray-900">Pricing</h4>
-                            <p class="text-sm text-gray-600 mt-1">Set competitive prices. Consider your costs, market rates, and profit margins.</p>
+                        <div class="ml-3">
+                            <h3 class="text-sm font-medium text-blue-800">Product Guidelines</h3>
+                            <div class="mt-2 text-sm text-blue-700">
+                                <ul class="list-disc list-inside space-y-1">
+                                    <li>Use clear, descriptive product names</li>
+                                    <li>Write detailed descriptions</li>
+                                    <li>Set competitive prices</li>
+                                    <li>Upload high-quality images</li>
+                                    <li>Keep stock levels updated</li>
+                                    <li>Choose appropriate categories</li>
+                                </ul>
+                            </div>
                         </div>
-                        
-                        <div class="border-l-4 border-yellow-500 pl-4">
-                            <h4 class="font-medium text-gray-900">Stock Management</h4>
-                            <p class="text-sm text-gray-600 mt-1">Keep accurate stock counts. Low stock items will be highlighted in the product list.</p>
+                    </div>
+                </div>
+
+                <!-- Statistics Card (only for edit) -->
+                <div th:if="${isEdit and product.id != null}" class="bg-white border border-gray-200 rounded-lg p-6">
+                    <h3 class="text-lg font-medium text-gray-900 mb-4">Product Statistics</h3>
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between">
+                            <span class="text-sm text-gray-600">Views</span>
+                            <span class="text-sm font-medium text-gray-900">0</span>
                         </div>
-                        
-                        <div class="border-l-4 border-purple-500 pl-4">
-                            <h4 class="font-medium text-gray-900">Product Images</h4>
-                            <p class="text-sm text-gray-600 mt-1">Use high-quality images with good lighting. Recommended size: 400x400 pixels or larger.</p>
+                        <div class="flex items-center justify-between">
+                            <span class="text-sm text-gray-600">Orders</span>
+                            <span class="text-sm font-medium text-gray-900">0</span>
                         </div>
-                        
-                        <div class="border-l-4 border-indigo-500 pl-4">
-                            <h4 class="font-medium text-gray-900">Categories</h4>
-                            <p class="text-sm text-gray-600 mt-1">Assign products to relevant categories to help customers find them easily.</p>
+                        <div class="flex items-center justify-between">
+                            <span class="text-sm text-gray-600">Revenue</span>
+                            <span class="text-sm text-gray-900">$0.00</span>
                         </div>
+
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="bg-white border border-gray-200 rounded-lg p-6">
+                    <h3 class="text-lg font-medium text-gray-900 mb-4">Quick Actions</h3>
+                    <div class="space-y-3">
+                        <a href="/admin/products" 
+                           class="w-full flex items-center px-3 py-2 text-sm text-gray-700 rounded-md hover:bg-gray-100 transition-colors">
+                            <i class="fas fa-list mr-3 text-gray-400"></i>
+                            View All Products
+                        </a>
+                        <a href="/admin/categories" 
+                           class="w-full flex items-center px-3 py-2 text-sm text-gray-700 rounded-md hover:bg-gray-100 transition-colors">
+                            <i class="fas fa-tags mr-3 text-gray-400"></i>
+                            Manage Categories
+                        </a>
+                        <a th:if="${isEdit and product.id != null and product.id > 0}" 
+                           th:href="@{/products/{id}(id=${product.id})}" 
+                           class="w-full flex items-center px-3 py-2 text-sm text-gray-700 rounded-md hover:bg-gray-100 transition-colors">
+                            <i class="fas fa-eye mr-3 text-gray-400"></i>
+                            View Product Page
+                        </a>
+                        <a href="/admin" 
+                           class="w-full flex items-center px-3 py-2 text-sm text-gray-700 rounded-md hover:bg-gray-100 transition-colors">
+                            <i class="fas fa-tachometer-alt mr-3 text-gray-400"></i>
+                            Admin Dashboard
+                        </a>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+</div>
 
+<th:block layout:fragment="scripts">
     <script>
-        // Form validation
-        document.addEventListener('DOMContentLoaded', function() {
-            const form = document.querySelector('form');
-            const inputs = form.querySelectorAll('input[required], select[required]');
-
-            // Add real-time validation
-            inputs.forEach(input => {
-                input.addEventListener('blur', validateField);
-                input.addEventListener('input', clearErrorState);
+        function resetForm() {
+            // Reset all form fields
+            document.getElementById('name').value = '';
+            document.getElementById('unitPrice').value = '';
+            document.getElementById('unitInStock').value = '';
+            document.getElementById('categoryId').value = '';
+            document.getElementById('thumbnailUrl').value = '';
+            
+            // Remove any error styling
+            document.querySelectorAll('.border-red-300').forEach(element => {
+                element.classList.remove('border-red-300', 'border-2');
+                element.classList.add('border-gray-300');
             });
+            
+            // Hide error messages
+            document.querySelectorAll('.text-red-600').forEach(element => {
+                element.style.display = 'none';
+            });
+            
+            // Focus on the first field
+            document.getElementById('name').focus();
+        }
 
-            // Form submission validation
-            form.addEventListener('submit', function(e) {
-                let isValid = true;
-                
-                inputs.forEach(input => {
-                    if (!validateField({ target: input })) {
-                        isValid = false;
-                    }
-                });
+        // Auto-resize textarea
+        const textarea = document.getElementById('description');
+        if (textarea) {
+            textarea.addEventListener('input', function() {
+                this.style.height = 'auto';
+                this.style.height = Math.min(this.scrollHeight, 200) + 'px';
+            });
+        }
 
-                if (!isValid) {
-                    e.preventDefault();
-                    showErrorMessage('Please fill in all required fields correctly.');
+        // Form validation feedback
+        document.querySelector('form').addEventListener('submit', function(e) {
+            let hasErrors = false;
+            
+            // Validate required fields
+            const requiredFields = ['name', 'unitPrice', 'unitInStock', 'categoryId', 'thumbnailUrl'];
+            requiredFields.forEach(fieldName => {
+                const field = document.getElementById(fieldName);
+                if (field && !field.value.trim()) {
+                    hasErrors = true;
+                    field.classList.add('border-red-300', 'border-2');
+                    field.classList.remove('border-gray-300');
                 }
             });
-
-            function validateField(e) {
-                const field = e.target;
-                const value = field.value.trim();
-                let isValid = true;
-                let errorMessage = '';
-
-                // Remove existing error styles
-                field.classList.remove('border-red-500', 'focus:ring-red-500', 'focus:border-red-500');
-                const existingError = field.parentNode.querySelector('.error-message');
-                if (existingError) {
-                    existingError.remove();
-                }
-
-                // Validate based on field type
-                if (field.hasAttribute('required') && !value) {
-                    isValid = false;
-                    errorMessage = 'This field is required.';
-                } else if (field.type === 'email' && value && !isValidEmail(value)) {
-                    isValid = false;
-                    errorMessage = 'Please enter a valid email address.';
-                } else if (field.type === 'url' && value && !isValidUrl(value)) {
-                    isValid = false;
-                    errorMessage = 'Please enter a valid URL.';
-                } else if (field.type === 'number' && value) {
-                    const num = parseFloat(value);
-                    const min = parseFloat(field.getAttribute('min'));
-                    const max = parseFloat(field.getAttribute('max'));
-                    
-                    if (isNaN(num)) {
-                        isValid = false;
-                        errorMessage = 'Please enter a valid number.';
-                    } else if (min !== null && num < min) {
-                        isValid = false;
-                        errorMessage = `Value must be at least ${min}.`;
-                    } else if (max !== null && num > max) {
-                        isValid = false;
-                        errorMessage = `Value must be no more than ${max}.`;
-                    }
-                }
-
-                if (!isValid) {
-                    // Add error styles
-                    field.classList.add('border-red-500', 'focus:ring-red-500', 'focus:border-red-500');
-                    
-                    // Add error message
-                    const errorDiv = document.createElement('p');
-                    errorDiv.className = 'error-message mt-1 text-sm text-red-600';
-                    errorDiv.textContent = errorMessage;
-                    field.parentNode.appendChild(errorDiv);
-                }
-
-                return isValid;
-            }
-
-            function clearErrorState(e) {
-                const field = e.target;
-                field.classList.remove('border-red-500', 'focus:ring-red-500', 'focus:border-red-500');
-                const existingError = field.parentNode.querySelector('.error-message');
-                if (existingError && field.value.trim()) {
-                    existingError.remove();
-                }
-            }
-
-            function isValidEmail(email) {
-                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-                return emailRegex.test(email);
-            }
-
-            function isValidUrl(url) {
-                try {
-                    new URL(url);
-                    return true;
-                } catch {
-                    return false;
-                }
-            }
-
-            function showErrorMessage(message) {
-                // Remove existing error message
-                const existingError = document.querySelector('.form-error-message');
-                if (existingError) {
-                    existingError.remove();
-                }
-
-                // Create and show new error message
-                const errorDiv = document.createElement('div');
-                errorDiv.className = 'form-error-message mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded-md';
-                errorDiv.innerHTML = `
-                    <div class="flex items-center">
-                        <i class="fas fa-exclamation-circle mr-2"></i>
-                        <span>${message}</span>
-                    </div>
-                `;
-                
-                const form = document.querySelector('form');
-                form.parentNode.insertBefore(errorDiv, form);
-                
-                // Scroll to error message
-                errorDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            }
-
-            // Initialize image preview if thumbnailUrl has value
-            const thumbnailUrlField = document.getElementById('thumbnailUrl');
-            if (thumbnailUrlField.value) {
-                updateImagePreview();
+            
+            if (hasErrors) {
+                e.preventDefault();
+                document.getElementById('name').focus();
             }
         });
 
-        // Image preview functionality
-        function updateImagePreview() {
-            const urlInput = document.getElementById('thumbnailUrl');
-            const preview = document.getElementById('imagePreview');
-            const previewImg = document.getElementById('previewImg');
-            
-            const url = urlInput.value.trim();
-            
-            if (url && isValidUrl(url)) {
-                previewImg.src = url;
-                previewImg.onload = function() {
-                    preview.classList.remove('hidden');
-                };
-                previewImg.onerror = function() {
-                    preview.classList.add('hidden');
-                };
-            } else {
-                preview.classList.add('hidden');
+        // Character counters
+        function addCharacterCounter(fieldId, maxLength, helpTextSelector) {
+            const field = document.getElementById(fieldId);
+            const helpText = document.querySelector(helpTextSelector);
+            if (field && helpText) {
+                field.addEventListener('input', function() {
+                    const remaining = maxLength - this.value.length;
+                    helpText.textContent = `${remaining} characters remaining`;
+                    
+                    if (remaining < 0) {
+                        helpText.classList.add('text-red-500');
+                        helpText.classList.remove('text-gray-500');
+                    } else {
+                        helpText.classList.add('text-gray-500');
+                        helpText.classList.remove('text-red-500');
+                    }
+                });
             }
         }
 
-        function isValidUrl(string) {
-            try {
-                new URL(string);
-                return true;
-            } catch (_) {
-                return false;
+        // Add character counters
+        addCharacterCounter('name', 200, '#name + div + p');
+
+        // Price validation
+        const priceField = document.getElementById('unitPrice');
+        if (priceField) {
+            priceField.addEventListener('input', function() {
+                const value = parseFloat(this.value);
+                if (value < 0) {
+                    this.value = 0;
+                }
+            });
+        }
+
+        // Stock validation
+        const stockField = document.getElementById('unitInStock');
+        if (stockField) {
+            stockField.addEventListener('input', function() {
+                const value = parseInt(this.value);
+                if (value < 0) {
+                    this.value = 0;
+                }
+            });
+        }
+
+        // URL validation and preview
+        const urlField = document.getElementById('thumbnailUrl');
+        if (urlField) {
+            urlField.addEventListener('blur', function() {
+                const url = this.value.trim();
+                if (url) {
+                    // Basic URL validation
+                    try {
+                        new URL(url);
+                        // Valid URL, try to create preview
+                        updateImagePreview(url);
+                    } catch (e) {
+                        // Invalid URL
+                        this.classList.add('border-red-300', 'border-2');
+                        this.classList.remove('border-gray-300');
+                    }
+                }
+            });
+            
+            urlField.addEventListener('input', function() {
+                // Remove error styling when user starts typing
+                this.classList.remove('border-red-300', 'border-2');
+                this.classList.add('border-gray-300');
+            });
+        }
+        
+        function updateImagePreview(url) {
+            // Remove existing preview
+            const existingPreview = document.getElementById('urlImagePreview');
+            if (existingPreview) {
+                existingPreview.remove();
             }
+            
+            // Create new preview
+            const preview = document.createElement('div');
+            preview.id = 'urlImagePreview';
+            preview.className = 'mt-3';
+            preview.innerHTML = `
+                <p class="text-sm text-gray-600">Preview:</p>
+                <img src="${url}" alt="Preview" class="mt-1 h-20 w-20 object-cover rounded-md border" 
+                     onload="this.style.display='block'" 
+                     onerror="this.style.display='none'; this.parentElement.innerHTML='<p class=\\'text-sm text-red-600\\'>Invalid image URL</p>'">
+            `;
+            urlField.closest('div').appendChild(preview);
         }
     </script>
-</body>
+</th:block>
+
 </html>

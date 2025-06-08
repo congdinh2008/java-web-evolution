@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" 
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${title} ?: 'Moderator Dashboard - ViVu Store'">Moderator Dashboard - ViVu Store</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @layer utilities {
+            .gradient-bg {
+                background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            }
+            .sidebar-gradient {
+                background: linear-gradient(180deg, #065f46 0%, #047857 50%, #10b981 100%);
+            }
+        }
+    </style>
+    
+    <!-- Page-specific CSS -->
+    <th:block layout:fragment="css"></th:block>
+</head>
+<body class="bg-gray-50 font-sans">
+    <!-- Mobile menu overlay -->
+    <div id="mobile-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden hidden"></div>
+    
+    <!-- Sidebar -->
+    <aside id="sidebar" class="fixed inset-y-0 left-0 z-50 w-64 sidebar-gradient transform -translate-x-full transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0">
+        <div class="flex items-center justify-center h-16 bg-black bg-opacity-20">
+            <div class="flex items-center space-x-2">
+                <i class="fas fa-user-check text-white text-2xl"></i>
+                <h1 class="text-white text-xl font-bold">Moderator Panel</h1>
+            </div>
+        </div>
+        
+        <!-- User Info -->
+        <div class="px-4 py-4 border-b border-white border-opacity-20" sec:authorize="isAuthenticated()">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
+                    <i class="fas fa-user text-white"></i>
+                </div>
+                <div>
+                    <p class="text-white font-medium text-sm" sec:authentication="principal.firstName">Moderator</p>
+                    <p class="text-green-200 text-xs" sec:authentication="principal.phoneNumber">+1234567890</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Navigation Menu -->
+        <nav class="mt-4 px-2">
+            <div class="space-y-2">
+                <!-- Dashboard -->
+                <a th:href="@{/moderator/dashboard}" 
+                   class="flex items-center px-4 py-3 text-white hover:bg-white hover:bg-opacity-10 rounded-lg transition-colors duration-200 group"
+                   th:classappend="${#httpServletRequest != null and #strings.contains(#httpServletRequest.requestURI, '/moderator/dashboard')} ? 'bg-white bg-opacity-20' : ''">
+                    <i class="fas fa-tachometer-alt mr-3 text-green-200 group-hover:text-white"></i>
+                    <span class="font-medium">Dashboard</span>
+                </a>
+                
+                <!-- Product Management -->
+                <a th:href="@{/products}" 
+                   class="flex items-center px-4 py-3 text-white hover:bg-white hover:bg-opacity-10 rounded-lg transition-colors duration-200 group"
+                   th:classappend="${#httpServletRequest != null and #strings.contains(#httpServletRequest.requestURI, '/products')} ? 'bg-white bg-opacity-20' : ''">
+                    <i class="fas fa-box mr-3 text-green-200 group-hover:text-white"></i>
+                    <span class="font-medium">Product Management</span>
+                </a>
+                
+                <!-- Category Management -->
+                <a th:href="@{/categories}" 
+                   class="flex items-center px-4 py-3 text-white hover:bg-white hover:bg-opacity-10 rounded-lg transition-colors duration-200 group"
+                   th:classappend="${#httpServletRequest != null and #strings.contains(#httpServletRequest.requestURI, '/categories')} ? 'bg-white bg-opacity-20' : ''">
+                    <i class="fas fa-tags mr-3 text-green-200 group-hover:text-white"></i>
+                    <span class="font-medium">Category Management</span>
+                </a>
+                
+                <!-- Order Review -->
+                <a th:href="@{/orders}" 
+                   class="flex items-center px-4 py-3 text-white hover:bg-white hover:bg-opacity-10 rounded-lg transition-colors duration-200 group"
+                   th:classappend="${#httpServletRequest != null and #strings.contains(#httpServletRequest.requestURI, '/orders')} ? 'bg-white bg-opacity-20' : ''">
+                    <i class="fas fa-shopping-cart mr-3 text-green-200 group-hover:text-white"></i>
+                    <span class="font-medium">Order Review</span>
+                </a>
+                
+                <!-- Reports -->
+                <a th:href="@{/reports}" 
+                   class="flex items-center px-4 py-3 text-white hover:bg-white hover:bg-opacity-10 rounded-lg transition-colors duration-200 group"
+                   th:classappend="${#httpServletRequest != null and #strings.contains(#httpServletRequest.requestURI, '/reports')} ? 'bg-white bg-opacity-20' : ''">
+                    <i class="fas fa-chart-bar mr-3 text-green-200 group-hover:text-white"></i>
+                    <span class="font-medium">Reports</span>
+                </a>
+                
+                <!-- Divider -->
+                <div class="border-t border-white border-opacity-20 my-4"></div>
+                
+                <!-- Back to Site -->
+                <a th:href="@{/home}" 
+                   class="flex items-center px-4 py-3 text-white hover:bg-white hover:bg-opacity-10 rounded-lg transition-colors duration-200 group">
+                    <i class="fas fa-home mr-3 text-green-200 group-hover:text-white"></i>
+                    <span class="font-medium">Back to Site</span>
+                </a>
+                
+                <!-- Logout -->
+                <form th:action="@{/logout}" method="post" class="mt-2">
+                    <button type="submit" 
+                            class="w-full flex items-center px-4 py-3 text-white hover:bg-red-500 hover:bg-opacity-20 rounded-lg transition-colors duration-200 group">
+                        <i class="fas fa-sign-out-alt mr-3 text-red-300 group-hover:text-red-200"></i>
+                        <span class="font-medium">Logout</span>
+                    </button>
+                </form>
+            </div>
+        </nav>
+    </aside>
+    
+    <!-- Main Content -->
+    <div class="lg:ml-64">
+        <!-- Top Navigation Bar -->
+        <header class="bg-white shadow-sm border-b border-gray-200">
+            <div class="flex items-center justify-between px-6 py-4">
+                <!-- Mobile menu button -->
+                <button id="mobile-menu-button" 
+                        class="lg:hidden text-gray-500 hover:text-gray-700 focus:outline-none focus:text-gray-700">
+                    <i class="fas fa-bars text-xl"></i>
+                </button>
+                
+                <!-- Page Title -->
+                <div class="flex-1 lg:flex-none">
+                    <h1 class="text-2xl font-semibold text-gray-900" layout:fragment="page-title">
+                        Moderator Dashboard
+                    </h1>
+                </div>
+                
+                <!-- Right side - notifications, profile -->
+                <div class="flex items-center space-x-4">
+                    <!-- Status Badge -->
+                    <span class="px-3 py-1 bg-green-100 text-green-800 text-sm font-medium rounded-full">
+                        Active
+                    </span>
+                    
+                    <!-- Notifications -->
+                    <button class="relative p-2 text-gray-500 hover:text-gray-700 focus:outline-none">
+                        <i class="fas fa-bell text-lg"></i>
+                        <!-- Notification badge -->
+                        <span class="absolute top-0 right-0 h-2 w-2 bg-red-500 rounded-full"></span>
+                    </button>
+                    
+                    <!-- Profile Dropdown -->
+                    <div class="relative">
+                        <button class="flex items-center space-x-2 text-gray-700 hover:text-gray-900 focus:outline-none">
+                            <div class="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
+                                <i class="fas fa-user text-white text-sm"></i>
+                            </div>
+                            <span class="hidden md:block font-medium" sec:authentication="principal.firstName">Moderator</span>
+                            <i class="fas fa-chevron-down text-sm"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </header>
+        
+        <!-- Main Content Area -->
+        <main class="p-6">
+            <!-- Breadcrumb -->
+            <nav class="mb-6" layout:fragment="breadcrumb">
+                <ol class="flex items-center space-x-2 text-sm text-gray-500">
+                    <li><a th:href="@{/moderator/dashboard}" class="hover:text-gray-700">Dashboard</a></li>
+                </ol>
+            </nav>
+            
+            <!-- Page Content -->
+            <div layout:fragment="content">
+                <!-- Content will be inserted here -->
+            </div>
+        </main>
+    </div>
+    
+    <!-- Scripts -->
+    <script>
+        // Mobile menu toggle
+        document.getElementById('mobile-menu-button')?.addEventListener('click', function() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('mobile-overlay');
+            
+            sidebar.classList.toggle('-translate-x-full');
+            overlay.classList.toggle('hidden');
+        });
+        
+        // Close mobile menu when clicking overlay
+        document.getElementById('mobile-overlay')?.addEventListener('click', function() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('mobile-overlay');
+            
+            sidebar.classList.add('-translate-x-full');
+            overlay.classList.add('hidden');
+        });
+        
+        // Close mobile menu on escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                const sidebar = document.getElementById('sidebar');
+                const overlay = document.getElementById('mobile-overlay');
+                
+                sidebar.classList.add('-translate-x-full');
+                overlay.classList.add('hidden');
+            }
+        });
+    </script>
+    
+    <!-- Page-specific scripts -->
+    <th:block layout:fragment="scripts"></th:block>
+</body>
+</html>

@@ -1,231 +1,268 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<html xmlns:th="http://www.thymeleaf.org" 
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{shared/layout/admin}" 
+      lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title th:text="${title}">Admin - Category Form</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <title th:text="${title} ?: (${isEdit} ? 'Edit Category - Admin Panel' : 'Add Category - Admin Panel')">Category Form - Admin Panel</title>
 </head>
-<body class="bg-gray-100">
-    <!-- Navigation Bar -->
-    <nav class="bg-white shadow-lg" aria-label="Admin navigation">
-        <div class="max-w-7xl mx-auto px-4">
-            <div class="flex justify-between h-16">
+
+<div layout:fragment="content">
+    <!-- Breadcrumb -->
+    <nav class="flex mb-6" aria-label="Breadcrumb">
+        <ol class="inline-flex items-center space-x-1 md:space-x-3">
+            <li class="inline-flex items-center">
+                <a href="/admin" class="text-gray-700 hover:text-blue-600">
+                    <i class="fas fa-home mr-2"></i>Admin
+                </a>
+            </li>
+            <li>
                 <div class="flex items-center">
-                    <a href="/admin" class="flex items-center space-x-2">
-                        <i class="fas fa-store text-blue-600 text-xl"></i>
-                        <span class="font-bold text-xl text-gray-800">Admin Panel</span>
-                    </a>
+                    <i class="fas fa-chevron-right text-gray-400 mx-2"></i>
+                    <a href="/admin/categories" class="text-gray-700 hover:text-blue-600">Categories</a>
                 </div>
-                <div class="flex items-center space-x-4">
-                    <a href="/admin/categories" class="bg-blue-600 text-white px-3 py-2 rounded-md text-sm font-medium">
-                        <i class="fas fa-tags mr-1"></i>Categories
-                    </a>
-                    <a href="/admin/products" class="text-gray-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium">
-                        <i class="fas fa-box mr-1"></i>Products
-                    </a>
-                    <a href="/" class="text-gray-600 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium">
-                        <i class="fas fa-home mr-1"></i>Home
-                    </a>
+            </li>
+            <li aria-current="page">
+                <div class="flex items-center">
+                    <i class="fas fa-chevron-right text-gray-400 mx-2"></i>
+                    <span class="text-gray-500" th:text="${isEdit ? 'Edit Category' : 'Add Category'}">Add Category</span>
                 </div>
-            </div>
-        </div>
+            </li>
+        </ol>
     </nav>
 
-    <!-- Main Content -->
-    <div class="max-w-4xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-        <!-- Breadcrumb -->
-        <nav class="flex mb-6" aria-label="Breadcrumb">
-            <ol class="inline-flex items-center space-x-1 md:space-x-3">
-                <li class="inline-flex items-center">
-                    <a href="/admin" class="text-gray-700 hover:text-blue-600">
-                        <i class="fas fa-home mr-2"></i>Admin
-                    </a>
-                </li>
-                <li>
-                    <div class="flex items-center">
-                        <i class="fas fa-chevron-right text-gray-400 mx-2"></i>
-                        <a href="/admin/categories" class="text-gray-700 hover:text-blue-600">Categories</a>
-                    </div>
-                </li>
-                <li aria-current="page">
-                    <div class="flex items-center">
-                        <i class="fas fa-chevron-right text-gray-400 mx-2"></i>
-                        <span class="text-gray-500" th:text="${isEdit ? 'Edit Category' : 'Add Category'}">Add Category</span>
-                    </div>
-                </li>
-            </ol>
-        </nav>
+    <!-- Header -->
+    <div class="mb-6">
+        <h1 class="text-3xl font-bold text-gray-900" th:text="${isEdit ? 'Edit Category' : 'Add New Category'}">Add New Category</h1>
+        <p class="mt-2 text-gray-600" th:text="${isEdit ? 'Update category information' : 'Create a new category for your products'}">Create a new category for your products</p>
+    </div>
 
-        <!-- Header -->
-        <div class="mb-6">
-            <h1 class="text-3xl font-bold text-gray-900" th:text="${isEdit ? 'Edit Category' : 'Add New Category'}">Add New Category</h1>
-            <p class="mt-2 text-gray-600" th:text="${isEdit ? 'Update category information' : 'Create a new category for your products'}">Create a new category for your products</p>
-        </div>
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Form -->
+        <div class="lg:col-span-2">
+            <div class="bg-white shadow-lg rounded-lg overflow-hidden">
+                <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
+                    <h3 class="text-lg font-medium text-gray-900">Category Information</h3>
+                    <p class="mt-1 text-sm text-gray-600">Fill in the category details below</p>
+                </div>
 
-        <!-- Flash Messages -->
-        <div th:if="${successMessage}" class="mb-4 p-4 bg-green-100 border border-green-400 text-green-700 rounded-md">
-            <div class="flex items-center">
-                <i class="fas fa-check-circle mr-2"></i>
-                <span th:text="${successMessage}"></span>
-            </div>
-        </div>
-
-        <div th:if="${errorMessage}" class="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded-md">
-            <div class="flex items-center">
-                <i class="fas fa-exclamation-circle mr-2"></i>
-                <span th:text="${errorMessage}"></span>
-            </div>
-        </div>
-
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <!-- Form -->
-            <div class="lg:col-span-2">
-                <div class="bg-white shadow-lg rounded-lg overflow-hidden">
-                    <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
-                        <h3 class="text-lg font-medium text-gray-900">Category Information</h3>
-                        <p class="mt-1 text-sm text-gray-600">Fill in the category details below</p>
-                    </div>
-
-                    <form th:action="${isEdit ? '/admin/categories/update' : '/admin/categories/add'}" 
-                          th:object="${category}" 
-                          method="POST" 
-                          class="p-6 space-y-6"
-                          novalidate>
-                        
-                        <!-- Hidden ID field for edit -->
-                        <input th:if="${isEdit}" type="hidden" th:field="*{id}">
-                        
-                        <!-- Category Name -->
-                        <div>
-                            <label for="name" class="block text-sm font-medium text-gray-700 mb-2">
-                                Category Name <span class="text-red-500">*</span>
-                            </label>
-                            <input type="text" 
-                                   id="name" 
-                                   th:field="*{name}"
-                                   required
-                                   class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                                   placeholder="Enter category name">
-                            <p class="mt-1 text-sm text-gray-500">Choose a unique name for this category</p>
+                <form th:action="${isEdit ? '/admin/categories/update' : '/admin/categories/add'}" 
+                      th:object="${category}" 
+                      method="POST" 
+                      class="p-6 space-y-6"
+                      novalidate>
+                    
+                    <!-- Hidden ID field for edit -->
+                    <input th:if="${isEdit}" type="hidden" th:field="*{id}">
+                    
+                    <!-- Category Name -->
+                    <div>
+                        <label for="name" class="block text-sm font-medium text-gray-700 mb-2">
+                            Category Name <span class="text-red-500">*</span>
+                        </label>
+                        <input type="text" 
+                               id="name" 
+                               th:field="*{name}"
+                               th:class="${#fields.hasErrors('name')} ? 'w-full px-3 py-2 border-2 border-red-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500' : 'w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500'"
+                               placeholder="Enter category name"
+                               maxlength="100"
+                               required>
+                        <div th:if="${#fields.hasErrors('name')}" class="mt-1 text-sm text-red-600">
+                            <ul class="list-disc list-inside">
+                                <li th:each="error : ${#fields.errors('name')}" th:text="${error}"></li>
+                            </ul>
                         </div>
+                        <p class="mt-1 text-sm text-gray-500">Maximum 100 characters</p>
+                    </div>
 
-                        <!-- Category Description -->
-                        <div>
-                            <label for="description" class="block text-sm font-medium text-gray-700 mb-2">
-                                Description
-                            </label>
-                            <textarea id="description" 
-                                      th:field="*{description}"
-                                      rows="4"
-                                      class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors resize-none"
-                                      placeholder="Enter a description for this category (optional)"></textarea>
-                            <p class="mt-1 text-sm text-gray-500">Provide a brief description of what products belong to this category</p>
+                    <!-- Category Description -->
+                    <div>
+                        <label for="description" class="block text-sm font-medium text-gray-700 mb-2">
+                            Description
+                        </label>
+                        <textarea id="description" 
+                                  th:field="*{description}"
+                                  th:class="${#fields.hasErrors('description')} ? 'w-full px-3 py-2 border-2 border-red-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500' : 'w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500'"
+                                  rows="4"
+                                  placeholder="Enter category description (optional)"
+                                  maxlength="500"></textarea>
+                        <div th:if="${#fields.hasErrors('description')}" class="mt-1 text-sm text-red-600">
+                            <ul class="list-disc list-inside">
+                                <li th:each="error : ${#fields.errors('description')}" th:text="${error}"></li>
+                            </ul>
                         </div>
+                        <p class="mt-1 text-sm text-gray-500">Maximum 500 characters (optional)</p>
+                    </div>
 
-                        <!-- Form Actions -->
-                        <div class="flex items-center justify-end space-x-4 pt-6 border-t border-gray-200">
-                            <a href="/admin/categories" 
-                               class="px-6 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors">
-                                Cancel
-                            </a>
+                    <!-- Form Actions -->
+                    <div class="flex items-center justify-between pt-4 border-t border-gray-200">
+                        <a href="/admin/categories" 
+                           class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors">
+                            <i class="fas fa-arrow-left mr-2"></i>
+                            Back to Categories
+                        </a>
+                        <div class="flex space-x-3">
+                            <button type="button" 
+                                    onclick="resetForm()"
+                                    class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors">
+                                <i class="fas fa-undo mr-2"></i>
+                                Reset
+                            </button>
                             <button type="submit" 
-                                    class="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors">
-                                <i th:class="${isEdit ? 'fas fa-save' : 'fas fa-plus'}" class="mr-2"></i>
-                                <span th:text="${isEdit ? 'Update Category' : 'Add Category'}">Add Category</span>
+                                    class="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors">
+                                <i class="fas fa-save mr-2"></i>
+                                <span th:text="${isEdit ? 'Update Category' : 'Create Category'}">Create Category</span>
                             </button>
                         </div>
-                    </form>
-                </div>
-            </div>
-
-            <!-- Help Section -->
-            <div class="lg:col-span-1">
-                <div class="bg-white shadow-lg rounded-lg overflow-hidden">
-                    <div class="px-6 py-4 border-b border-gray-200 bg-blue-50">
-                        <h3 class="text-lg font-medium text-blue-900">
-                            <i class="fas fa-lightbulb mr-2"></i>Tips & Guidelines
-                        </h3>
                     </div>
-                    <div class="p-6 space-y-4">
-                        <div class="border-l-4 border-blue-500 pl-4">
-                            <h4 class="font-medium text-gray-900">Category Names</h4>
-                            <p class="text-sm text-gray-600 mt-1">Choose clear, descriptive names that customers will understand and search for.</p>
+                </form>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="lg:col-span-1">
+            <div class="space-y-6">
+                <!-- Help Card -->
+                <div class="bg-blue-50 border border-blue-200 rounded-lg p-6">
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-info-circle text-blue-400 text-xl"></i>
                         </div>
-                        
-                        <div class="border-l-4 border-green-500 pl-4">
-                            <h4 class="font-medium text-gray-900">Organization</h4>
-                            <p class="text-sm text-gray-600 mt-1">Keep category names concise but informative. Use consistent naming conventions.</p>
+                        <div class="ml-3">
+                            <h3 class="text-sm font-medium text-blue-800">Category Guidelines</h3>
+                            <div class="mt-2 text-sm text-blue-700">
+                                <ul class="list-disc list-inside space-y-1">
+                                    <li>Use clear, descriptive names</li>
+                                    <li>Keep names concise but informative</li>
+                                    <li>Add descriptions to help customers understand the category</li>
+                                    <li>Check for existing similar categories before creating new ones</li>
+                                </ul>
+                            </div>
                         </div>
-                        
-                        <div class="border-l-4 border-yellow-500 pl-4">
-                            <h4 class="font-medium text-gray-900">Descriptions</h4>
-                            <p class="text-sm text-gray-600 mt-1">Add helpful descriptions to explain what types of products belong in each category.</p>
+                    </div>
+                </div>
+
+                <!-- Statistics Card (only for edit) -->
+                <div th:if="${isEdit and category.id != null and category.id > 0}" class="bg-white border border-gray-200 rounded-lg p-6">
+                    <h3 class="text-lg font-medium text-gray-900 mb-4">Category Statistics</h3>
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between">
+                            <span class="text-sm text-gray-600">Products</span>
+                            <span class="text-sm font-medium text-gray-900">0</span>
                         </div>
-                        
-                        <div class="border-l-4 border-purple-500 pl-4">
-                            <h4 class="font-medium text-gray-900">Search & Navigation</h4>
-                            <p class="text-sm text-gray-600 mt-1">Consider how customers might search for products when creating categories.</p>
-                        </div>
-                        
-                        <div class="border-l-4 border-indigo-500 pl-4">
-                            <h4 class="font-medium text-gray-900">Product Assignment</h4>
-                            <p class="text-sm text-gray-600 mt-1">After creating categories, you can assign them to products in the product management section.</p>
-                        </div>
+
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="bg-white border border-gray-200 rounded-lg p-6">
+                    <h3 class="text-lg font-medium text-gray-900 mb-4">Quick Actions</h3>
+                    <div class="space-y-3">
+                        <a href="/admin/categories" 
+                           class="w-full flex items-center px-3 py-2 text-sm text-gray-700 rounded-md hover:bg-gray-100 transition-colors">
+                            <i class="fas fa-list mr-3 text-gray-400"></i>
+                            View All Categories
+                        </a>
+                        <a href="/admin/products" 
+                           class="w-full flex items-center px-3 py-2 text-sm text-gray-700 rounded-md hover:bg-gray-100 transition-colors">
+                            <i class="fas fa-box mr-3 text-gray-400"></i>
+                            Manage Products
+                        </a>
+                        <a href="/admin" 
+                           class="w-full flex items-center px-3 py-2 text-sm text-gray-700 rounded-md hover:bg-gray-100 transition-colors">
+                            <i class="fas fa-tachometer-alt mr-3 text-gray-400"></i>
+                            Admin Dashboard
+                        </a>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+</div>
 
+<th:block layout:fragment="scripts">
     <script>
-        // Form validation
-        document.addEventListener('DOMContentLoaded', function() {
-            const form = document.querySelector('form');
-            const nameInput = document.getElementById('name');
-            const textarea = document.getElementById('description');
+        function resetForm() {
+            // Reset all form fields
+            document.getElementById('name').value = '';
+            document.getElementById('description').value = '';
+            
+            // Remove any error styling
+            document.querySelectorAll('.border-red-300').forEach(element => {
+                element.classList.remove('border-red-300', 'border-2');
+                element.classList.add('border-gray-300');
+            });
+            
+            // Hide error messages
+            document.querySelectorAll('.text-red-600').forEach(element => {
+                element.style.display = 'none';
+            });
+            
+            // Focus on the first field
+            document.getElementById('name').focus();
+        }
 
-            // Auto-resize textarea
-            if (textarea) {
-                textarea.addEventListener('input', function() {
-                    this.style.height = 'auto';
-                    this.style.height = this.scrollHeight + 'px';
-                });
+        // Auto-resize textarea
+        const textarea = document.getElementById('description');
+        if (textarea) {
+            textarea.addEventListener('input', function() {
+                this.style.height = 'auto';
+                this.style.height = Math.min(this.scrollHeight, 200) + 'px';
+            });
+        }
+
+        // Form validation feedback
+        document.querySelector('form').addEventListener('submit', function(e) {
+            const nameField = document.getElementById('name');
+            const name = nameField.value.trim();
+            
+            if (!name) {
+                e.preventDefault();
+                nameField.focus();
+                nameField.classList.add('border-red-300', 'border-2');
+                nameField.classList.remove('border-gray-300');
             }
-
-            // Form validation
-            form.addEventListener('submit', function(e) {
-                const name = nameInput.value.trim();
-                
-                if (!name) {
-                    e.preventDefault();
-                    alert('Category name is required.');
-                    nameInput.focus();
-                    return false;
-                }
-                
-                if (name.length < 2) {
-                    e.preventDefault();
-                    alert('Category name must be at least 2 characters long.');
-                    nameInput.focus();
-                    return false;
-                }
-            });
-
-            // Real-time validation feedback
-            nameInput.addEventListener('input', function() {
-                const value = this.value.trim();
-                if (value.length > 0 && value.length < 2) {
-                    this.classList.add('border-red-500');
-                    this.classList.remove('border-gray-300');
-                } else {
-                    this.classList.remove('border-red-500');
-                    this.classList.add('border-gray-300');
-                }
-            });
         });
+
+        // Character counter for name field
+        const nameField = document.getElementById('name');
+        const nameHelpText = nameField.nextElementSibling?.nextElementSibling;
+        if (nameField && nameHelpText) {
+            nameField.addEventListener('input', function() {
+                const remaining = 100 - this.value.length;
+                const helpText = nameHelpText.querySelector('p') || nameHelpText;
+                helpText.textContent = `${remaining} characters remaining`;
+                
+                if (remaining < 0) {
+                    helpText.classList.add('text-red-500');
+                    helpText.classList.remove('text-gray-500');
+                } else {
+                    helpText.classList.add('text-gray-500');
+                    helpText.classList.remove('text-red-500');
+                }
+            });
+        }
+
+        // Character counter for description field
+        const descField = document.getElementById('description');
+        const descHelpText = descField.nextElementSibling?.nextElementSibling;
+        if (descField && descHelpText) {
+            descField.addEventListener('input', function() {
+                const remaining = 500 - this.value.length;
+                const helpText = descHelpText.querySelector('p') || descHelpText;
+                helpText.textContent = `${remaining} characters remaining (optional)`;
+                
+                if (remaining < 0) {
+                    helpText.classList.add('text-red-500');
+                    helpText.classList.remove('text-gray-500');
+                } else {
+                    helpText.classList.add('text-gray-500');
+                    helpText.classList.remove('text-red-500');
+                }
+            });
+        }
     </script>
-</body>
+</th:block>
+
 </html>

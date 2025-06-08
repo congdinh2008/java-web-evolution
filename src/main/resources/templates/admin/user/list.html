@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" 
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      layout:decorate="~{shared/layout/admin}">
+<head>
+    <title>User Management</title>
+</head>
+<body>    <div layout:fragment="content">
+        <!-- Page Header -->
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-900 flex items-center">
+                    <i class="fas fa-users mr-3 text-indigo-600"></i>User Management
+                </h1>
+                <p class="text-gray-600 mt-2">Manage system users and their permissions</p>
+            </div>
+            <div class="mt-4 sm:mt-0">
+                <a href="/admin/users/create" class="inline-flex items-center px-6 py-3 bg-indigo-600 text-white font-semibold rounded-lg shadow-md hover:bg-indigo-700 hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-300">
+                    <i class="fas fa-plus mr-2"></i>Add New User
+                </a>
+            </div>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <div class="bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl p-6 text-white shadow-lg">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-blue-100 text-sm font-medium">Total Users</p>
+                        <p class="text-3xl font-bold" th:text="${totalUsers}">0</p>
+                    </div>
+                    <div class="bg-blue-400 bg-opacity-30 rounded-full p-3">
+                        <i class="fas fa-users text-2xl"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-gradient-to-r from-green-500 to-green-600 rounded-xl p-6 text-white shadow-lg">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-green-100 text-sm font-medium">Active Users</p>
+                        <p class="text-3xl font-bold" th:text="${activeUsers}">0</p>
+                    </div>
+                    <div class="bg-green-400 bg-opacity-30 rounded-full p-3">
+                        <i class="fas fa-user-check text-2xl"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-gradient-to-r from-yellow-500 to-yellow-600 rounded-xl p-6 text-white shadow-lg">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-yellow-100 text-sm font-medium">Inactive Users</p>
+                        <p class="text-3xl font-bold" th:text="${inactiveUsers}">0</p>
+                    </div>
+                    <div class="bg-yellow-400 bg-opacity-30 rounded-full p-3">
+                        <i class="fas fa-user-times text-2xl"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-gradient-to-r from-purple-500 to-purple-600 rounded-xl p-6 text-white shadow-lg">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-purple-100 text-sm font-medium">Admin Users</p>
+                        <p class="text-3xl font-bold" th:text="${adminUsers}">0</p>
+                    </div>
+                    <div class="bg-purple-400 bg-opacity-30 rounded-full p-3">
+                        <i class="fas fa-user-shield text-2xl"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Search and Filter -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-8">
+            <form method="get" th:action="@{/admin/users}" class="grid grid-cols-1 md:grid-cols-5 gap-4">
+                <div class="md:col-span-2">
+                    <label for="search" class="block text-sm font-medium text-gray-700 mb-2">Search Users</label>
+                    <div class="relative">
+                        <input type="text" 
+                               id="search"
+                               name="search" 
+                               th:value="${param.search}" 
+                               placeholder="Search by name, email, or phone..."
+                               class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i class="fas fa-search text-gray-400"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <div>
+                    <label for="role" class="block text-sm font-medium text-gray-700 mb-2">Role</label>
+                    <select name="role" id="role" onchange="this.form.submit()" 
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                        <option value="">All Roles</option>
+                        <option th:each="role : ${roles}" 
+                                th:value="${role.name}" 
+                                th:text="${role.name}"
+                                th:selected="${param.role == role.name}">Role</option>
+                    </select>
+                </div>
+                
+                <div>
+                    <label for="status" class="block text-sm font-medium text-gray-700 mb-2">Status</label>
+                    <select name="status" id="status" onchange="this.form.submit()" 
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                        <option value="">All Status</option>
+                        <option value="active" th:selected="${param.status == 'active'}">Active</option>
+                        <option value="inactive" th:selected="${param.status == 'inactive'}">Inactive</option>
+                    </select>
+                </div>
+                
+                <div class="flex items-end space-x-2">
+                    <button type="submit" 
+                            class="flex-1 bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors duration-200 flex items-center justify-center">
+                        <i class="fas fa-search mr-2"></i>Search
+                    </button>
+                    <a href="/admin/users" 
+                       class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors duration-200 flex items-center justify-center">
+                        <i class="fas fa-times"></i>
+                    </a>
+                </div>
+            </form>
+        </div>
+
+        <!-- Users Table -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Contact</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Roles</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created</th>
+                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        <tr th:if="${#lists.isEmpty(users.content)}">
+                            <td colspan="6" class="px-6 py-12 text-center text-gray-500">
+                                <i class="fas fa-users text-4xl mb-4 text-gray-300"></i>
+                                <p class="text-lg font-medium">No users found</p>
+                                <p class="text-sm">Try adjusting your search criteria</p>
+                            </td>
+                        </tr>
+                        <tr th:each="user : ${users.content}" class="hover:bg-gray-50 transition-colors duration-150">
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="flex items-center">
+                                    <div class="flex-shrink-0 h-12 w-12">
+                                        <div class="h-12 w-12 rounded-full bg-indigo-100 flex items-center justify-center">
+                                            <span class="text-indigo-600 font-medium text-lg" th:text="${user.firstName?.charAt(0) ?: 'U'}">U</span>
+                                        </div>
+                                    </div>
+                                    <div class="ml-4">
+                                        <div class="text-sm font-medium text-gray-900" th:text="${user.firstName + ' ' + user.lastName}">John Doe</div>
+                                        <div class="text-sm text-gray-500" th:text="'ID: ' + ${user.id}">#001</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-900" th:text="${user.email}">john@example.com</div>
+                                <div class="text-sm text-gray-500" th:text="${user.phoneNumber}">+1234567890</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="flex flex-wrap gap-1">
+                                    <span th:each="role : ${user.roles}" 
+                                          class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800" 
+                                          th:text="${role.name}">Role</span>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span th:if="${user.enabled}" 
+                                      class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                    <span class="w-1.5 h-1.5 mr-1.5 bg-green-400 rounded-full"></span>
+                                    Active
+                                </span>
+                                <span th:unless="${user.enabled}" 
+                                      class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                    <span class="w-1.5 h-1.5 mr-1.5 bg-red-400 rounded-full"></span>
+                                    Inactive
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500" th:text="${#temporals.format(user.createdAt, 'MMM dd, yyyy')}">Jan 01, 2024</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                <div class="flex items-center justify-end space-x-2">
+                                    <a th:href="@{/admin/users/{id}(id=${user.id})}" 
+                                       class="text-indigo-600 hover:text-indigo-900 p-2 rounded-lg hover:bg-indigo-50 transition-colors duration-200" 
+                                       title="View Details">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a th:href="@{/admin/users/{id}/edit(id=${user.id})}" 
+                                       class="text-yellow-600 hover:text-yellow-900 p-2 rounded-lg hover:bg-yellow-50 transition-colors duration-200" 
+                                       title="Edit User">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <form th:action="@{/admin/users/{id}/toggle-status(id=${user.id})}" 
+                                          method="post" class="inline">
+                                        <button type="submit" 
+                                                th:class="${user.enabled} ? 'text-red-600 hover:text-red-900 p-2 rounded-lg hover:bg-red-50 transition-colors duration-200' : 'text-green-600 hover:text-green-900 p-2 rounded-lg hover:bg-green-50 transition-colors duration-200'"
+                                                th:title="${user.enabled} ? 'Disable User' : 'Enable User'">
+                                            <i th:class="${user.enabled} ? 'fas fa-user-times' : 'fas fa-user-check'"></i>
+                                        </button>
+                                    </form>
+                                    <form th:action="@{/admin/users/{id}/reset-password(id=${user.id})}" 
+                                          method="post" class="inline">
+                                        <button type="submit" 
+                                                class="text-gray-600 hover:text-gray-900 p-2 rounded-lg hover:bg-gray-50 transition-colors duration-200" 
+                                                title="Reset Password">
+                                            <i class="fas fa-key"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            <div th:if="${users.totalPages > 1}" class="bg-white px-6 py-3 border-t border-gray-200">
+                <div class="flex items-center justify-between">
+                    <div class="flex-1 flex justify-between sm:hidden">
+                        <a th:href="@{/admin/users(page=${users.number - 1}, size=${users.size}, search=${param.search}, role=${param.role}, status=${param.status})}"
+                           th:class="${users.first} ? 'disabled-link' : 'relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50'">
+                            Previous
+                        </a>
+                        <a th:href="@{/admin/users(page=${users.number + 1}, size=${users.size}, search=${param.search}, role=${param.role}, status=${param.status})}"
+                           th:class="${users.last} ? 'disabled-link' : 'ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50'">
+                            Next
+                        </a>
+                    </div>
+                    <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+                        <div>
+                            <p class="text-sm text-gray-700">
+                                Showing <span class="font-medium" th:text="${users.number * users.size + 1}">1</span>
+                                to <span class="font-medium" th:text="${users.last ? users.totalElements : (users.number + 1) * users.size}">10</span>
+                                of <span class="font-medium" th:text="${users.totalElements}">97</span> results
+                            </p>
+                        </div>
+                        <div>
+                            <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px">
+                                <a th:href="@{/admin/users(page=${users.number - 1}, size=${users.size}, search=${param.search}, role=${param.role}, status=${param.status})}"
+                                   th:class="${users.first} ? 'disabled-link' : 'relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50'">
+                                    <i class="fas fa-chevron-left"></i>
+                                </a>
+                                
+                                <a th:each="i : ${#numbers.sequence(0, users.totalPages - 1)}" 
+                                   th:href="@{/admin/users(page=${i}, size=${users.size}, search=${param.search}, role=${param.role}, status=${param.status})}"
+                                   th:class="${i == users.number} ? 'relative inline-flex items-center px-4 py-2 border border-gray-300 bg-indigo-50 text-sm font-medium text-indigo-600' : 'relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50'"
+                                   th:text="${i + 1}">1</a>
+                                
+                                <a th:href="@{/admin/users(page=${users.number + 1}, size=${users.size}, search=${param.search}, role=${param.role}, status=${param.status})}"
+                                   th:class="${users.last} ? 'disabled-link' : 'relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50'">
+                                    <i class="fas fa-chevron-right"></i>
+                                </a>
+                            </nav>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>

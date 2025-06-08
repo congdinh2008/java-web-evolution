@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" 
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      layout:decorate="~{shared/layout/admin}">
+<head>
+    <title>Edit Role</title>
+</head>
+<body>
+    <div layout:fragment="content">
+        <!-- Header -->
+        <div class="mb-8">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-900 flex items-center">
+                        <i class="fas fa-edit mr-3 text-yellow-600"></i>
+                        Edit Role
+                    </h1>
+                    <p class="mt-2 text-gray-600">Update role information and permissions</p>
+                </div>
+                <div class="mt-4 sm:mt-0 flex flex-wrap gap-3">
+                    <a th:href="@{/admin/roles/{id}(id=${role.id})}" 
+                       class="inline-flex items-center px-4 py-2 border border-blue-300 rounded-lg text-sm font-medium text-blue-700 bg-white hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors">
+                        <i class="fas fa-eye mr-2"></i>
+                        View Role
+                    </a>
+                    <a href="/admin/roles" 
+                       class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors">
+                        <i class="fas fa-arrow-left mr-2"></i>
+                        Back to Roles
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Alert Messages -->
+        <div th:if="${successMessage}" class="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg flex items-center justify-between">
+            <div class="flex items-center">
+                <i class="fas fa-check-circle mr-3 text-green-600"></i>
+                <span th:text="${successMessage}" class="text-green-800">Success message</span>
+            </div>
+            <button type="button" onclick="this.parentElement.style.display='none'" class="text-green-600 hover:text-green-800">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <div th:if="${errorMessage}" class="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-center justify-between">
+            <div class="flex items-center">
+                <i class="fas fa-exclamation-circle mr-3 text-red-600"></i>
+                <span th:text="${errorMessage}" class="text-red-800">Error message</span>
+            </div>
+            <button type="button" onclick="this.parentElement.style.display='none'" class="text-red-600 hover:text-red-800">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <!-- Role Overview Card -->
+        <div class="bg-white rounded-lg shadow-md border border-gray-200 mb-8">
+            <div class="p-6">
+                <div class="flex flex-col md:flex-row md:items-center gap-6">
+                    <div class="flex-shrink-0 text-center md:text-left">
+                        <div class="w-20 h-20 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center text-white text-2xl mx-auto md:mx-0">
+                            <i class="fas fa-user-shield"></i>
+                        </div>
+                    </div>
+                    <div class="flex-grow text-center md:text-left">
+                        <h4 th:text="${role.name}" class="text-2xl font-bold text-gray-900 mb-2">Role Name</h4>
+                        <p th:text="${role.description}" class="text-gray-600 mb-2">Role description</p>
+                        <p class="text-sm text-gray-500">
+                            Created: <span th:text="${#temporals.format(role.createdAt, 'MMM dd, yyyy')}">Jan 01, 2024</span>
+                        </p>
+                    </div>
+                    <div class="text-center md:text-right">
+                        <div class="mb-3">
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
+                                Active Role
+                            </span>
+                        </div>
+                        <div class="flex items-center justify-center md:justify-end text-gray-600">
+                            <i class="fas fa-users mr-2"></i>
+                            <span th:text="${role.users?.size() ?: 0}">0</span> assigned users
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Edit Form -->
+            <div class="lg:col-span-2">
+                <div class="bg-white rounded-lg shadow-md border border-gray-200">
+                    <div class="bg-gradient-to-r from-yellow-500 to-orange-500 text-white px-6 py-4 rounded-t-lg">
+                        <h5 class="text-lg font-semibold flex items-center">
+                            <i class="fas fa-edit mr-3"></i>Update Role Information
+                        </h5>
+                    </div>
+                    <div class="p-6">
+                        <form th:action="@{/admin/roles/{id}/edit(id=${role.id})}" method="post" th:object="${role}" novalidate>
+                            <input type="hidden" th:field="*{id}">
+                            
+                            <!-- Role Name -->
+                            <div class="mb-6">
+                                <label for="name" class="block text-sm font-medium text-gray-700 mb-2">
+                                    <i class="fas fa-tag mr-2 text-yellow-600"></i>Role Name <span class="text-red-500">*</span>
+                                </label>
+                                <input type="text" 
+                                       th:field="*{name}" 
+                                       th:class="${#fields.hasErrors('name')} ? 'w-full px-4 py-3 border-2 border-red-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500' : 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500'"
+                                       id="name" 
+                                       placeholder="Enter role name" 
+                                       required>
+                                <div th:if="${#fields.hasErrors('name')}" class="mt-2 text-sm text-red-600">
+                                    <span th:errors="*{name}">Name error</span>
+                                </div>
+                                <div class="mt-2 text-sm text-gray-500">
+                                    Role name should be unique and descriptive. Use uppercase convention.
+                                </div>
+                            </div>
+
+                            <!-- Role Description -->
+                            <div class="mb-6">
+                                <label for="description" class="block text-sm font-medium text-gray-700 mb-2">
+                                    <i class="fas fa-info-circle mr-2 text-yellow-600"></i>Description <span class="text-red-500">*</span>
+                                </label>
+                                <textarea th:field="*{description}" 
+                                          th:class="${#fields.hasErrors('description')} ? 'w-full px-4 py-3 border-2 border-red-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500' : 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500'"
+                                          id="description" 
+                                          rows="4" 
+                                          placeholder="Describe the role's purpose and responsibilities..." 
+                                          required></textarea>
+                                <div th:if="${#fields.hasErrors('description')}" class="mt-2 text-sm text-red-600">
+                                    <span th:errors="*{description}">Description error</span>
+                                </div>
+                                <div class="mt-2 text-sm text-gray-500">
+                                    Provide a clear description of what this role can do and its responsibilities.
+                                </div>
+                            </div>
+
+                            <!-- Warning for roles with users -->
+                            <div th:if="${role.users?.size() > 0}" class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
+                                <h6 class="text-yellow-800 font-semibold mb-2 flex items-center">
+                                    <i class="fas fa-exclamation-triangle mr-2"></i>Users Assigned
+                                </h6>
+                                <p class="text-yellow-700">
+                                    This role is currently assigned to <strong th:text="${role.users?.size()}">0</strong> user(s).
+                                    Changes to this role will affect all assigned users' permissions.
+                                </p>
+                            </div>
+
+                            <!-- Form Actions -->
+                            <div class="flex flex-col sm:flex-row justify-end gap-3">
+                                <a href="/admin/roles" 
+                                   class="inline-flex items-center justify-center px-6 py-3 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors">
+                                    <i class="fas fa-times mr-2"></i>Cancel
+                                </a>
+                                <button type="submit" 
+                                        class="inline-flex items-center justify-center px-6 py-3 bg-gradient-to-r from-yellow-500 to-orange-500 text-white rounded-lg hover:from-yellow-600 hover:to-orange-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 transition-all duration-200 font-medium">
+                                    <i class="fas fa-save mr-2"></i>Update Role
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Role Information Sidebar -->
+            <div class="lg:col-span-1 space-y-6">
+                <!-- Assigned Users -->
+                <div class="bg-white rounded-lg shadow-md border border-gray-200">
+                    <div class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-4 rounded-t-lg">
+                        <h6 class="text-lg font-semibold flex items-center">
+                            <i class="fas fa-users mr-3"></i>Assigned Users
+                        </h6>
+                    </div>
+                    <div class="p-6">
+                        <div th:if="${role.users?.empty}" class="text-center text-gray-500">
+                            <i class="fas fa-user-slash text-4xl mb-4 text-gray-300"></i>
+                            <p>No users assigned to this role</p>
+                        </div>
+                        
+                        <div th:unless="${role.users?.empty}" class="space-y-3">
+                            <div th:each="user : ${role.users}" class="flex items-center">
+                                <div class="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white text-sm font-semibold mr-3">
+                                    <span th:text="${user.firstName?.charAt(0) ?: 'U'}">U</span>
+                                </div>
+                                <div class="flex-grow">
+                                    <div class="font-semibold text-gray-900" th:text="${user.firstName + ' ' + user.lastName}">User Name</div>
+                                    <div class="text-sm text-gray-500" th:text="${user.email ?: user.phoneNumber}">Contact</div>
+                                </div>
+                            </div>
+                            
+                            <div class="pt-4 border-t border-gray-200">
+                                <a th:href="@{/admin/roles/{id}/users(id=${role.id})}" 
+                                   class="w-full inline-flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors">
+                                    <i class="fas fa-users mr-2"></i>View All Users
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Role Actions -->
+                <div class="bg-white rounded-lg shadow-md border border-gray-200">
+                    <div class="bg-gray-50 px-6 py-4 rounded-t-lg border-b border-gray-200">
+                        <h6 class="text-lg font-semibold text-gray-900 flex items-center">
+                            <i class="fas fa-cogs mr-3 text-gray-600"></i>Role Actions
+                        </h6>
+                    </div>
+                    <div class="p-6 space-y-3">
+                        <a th:href="@{/admin/roles/{id}/users(id=${role.id})}" 
+                           class="w-full inline-flex items-center justify-center px-4 py-2 border border-blue-300 text-blue-700 rounded-lg hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors">
+                            <i class="fas fa-users mr-2"></i>Manage Users
+                        </a>
+                        
+                        <a th:href="@{/admin/roles/{id}(id=${role.id})}" 
+                           class="w-full inline-flex items-center justify-center px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors">
+                            <i class="fas fa-eye mr-2"></i>View Details
+                        </a>
+
+                        <div th:if="${role.users?.size() == 0}">
+                            <button type="button" 
+                                    class="w-full inline-flex items-center justify-center px-4 py-2 border border-red-300 text-red-700 rounded-lg hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors"
+                                    th:onclick="|deleteRole(${role.id}, '${role.name}')|">
+                                <i class="fas fa-trash mr-2"></i>Delete Role
+                            </button>
+                        </div>
+                        
+                        <div th:if="${role.users?.size() > 0}">
+                            <button type="button" 
+                                    class="w-full inline-flex items-center justify-center px-4 py-2 border border-gray-300 text-gray-400 rounded-lg cursor-not-allowed"
+                                    disabled>
+                                <i class="fas fa-exclamation-triangle mr-2"></i>Cannot Delete
+                            </button>
+                            <p class="text-xs text-gray-500 text-center mt-2">
+                                Remove all users first
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div id="deleteModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+        <div class="bg-white rounded-lg shadow-lg max-w-md w-full mx-4">
+            <div class="flex items-center justify-between p-6 border-b border-gray-200">
+                <h5 class="text-lg font-semibold text-gray-900 flex items-center">
+                    <i class="fas fa-exclamation-triangle text-yellow-500 mr-3"></i>Confirm Delete
+                </h5>
+                <button type="button" onclick="closeDeleteModal()" class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="p-6">
+                <p class="text-gray-700 mb-4">
+                    Are you sure you want to delete the role <strong id="roleNameToDelete"></strong>?
+                </p>
+                <p class="text-red-600 flex items-center">
+                    <i class="fas fa-exclamation-triangle mr-2"></i>
+                    This action cannot be undone.
+                </p>
+            </div>
+            <div class="flex justify-end gap-3 p-6 border-t border-gray-200">
+                <button type="button" onclick="closeDeleteModal()" 
+                        class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors">
+                    Cancel
+                </button>
+                <form id="deleteForm" method="post" class="inline">
+                    <button type="submit" 
+                            class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors">
+                        <i class="fas fa-trash mr-2"></i>Delete Role
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Delete role function
+        function deleteRole(roleId, roleName) {
+            document.getElementById('roleNameToDelete').textContent = roleName;
+            document.getElementById('deleteForm').action = '/admin/roles/' + roleId + '/delete';
+            document.getElementById('deleteModal').classList.remove('hidden');
+            document.getElementById('deleteModal').classList.add('flex');
+        }
+
+        function closeDeleteModal() {
+            document.getElementById('deleteModal').classList.add('hidden');
+            document.getElementById('deleteModal').classList.remove('flex');
+        }
+
+        // Form validation
+        document.querySelector('form').addEventListener('submit', function(e) {
+            const name = document.getElementById('name').value.trim();
+            const description = document.getElementById('description').value.trim();
+
+            if (!name || !description) {
+                e.preventDefault();
+                alert('Please fill in all required fields.');
+                return;
+            }
+        });
+
+        // Auto-hide alerts
+        setTimeout(function() {
+            const alerts = document.querySelectorAll('[class*="bg-green-50"], [class*="bg-red-50"]');
+            alerts.forEach(alert => {
+                const closeButton = alert.querySelector('button');
+                if (closeButton) {
+                    setTimeout(() => {
+                        alert.style.display = 'none';
+                    }, 5000);
+                }
+            });
+        }, 100);
+    </script>
+</body>
+</html>

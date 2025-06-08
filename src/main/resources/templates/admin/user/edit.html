@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" 
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      layout:decorate="~{shared/layout/admin}">
+<head>
+    <title>Edit User</title>
+</head>
+<body>
+    <div layout:fragment="content">
+        <!-- Header -->
+        <div class="mb-8">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-900 flex items-center">
+                        <i class="fas fa-user-edit mr-3 text-yellow-600"></i>
+                        Edit User
+                    </h1>
+                    <p class="mt-2 text-gray-600">Update user information and permissions</p>
+                </div>
+                <div class="mt-4 sm:mt-0 flex flex-wrap gap-2">
+                    <a th:href="@{/admin/users/{id}(id=${user.id})}" 
+                       class="inline-flex items-center px-4 py-2 border border-blue-300 rounded-lg text-sm font-medium text-blue-700 bg-blue-50 hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors">
+                        <i class="fas fa-eye mr-2"></i>
+                        View User
+                    </a>
+                    <a href="/admin/users" 
+                       class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors">
+                        <i class="fas fa-arrow-left mr-2"></i>
+                        Back to Users
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Alert Messages -->
+        <div th:if="${successMessage}" class="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
+            <div class="flex items-center">
+                <i class="fas fa-check-circle text-green-600 mr-2"></i>
+                <span class="text-green-800" th:text="${successMessage}">Success message</span>
+            </div>
+        </div>
+
+        <div th:if="${errorMessage}" class="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+            <div class="flex items-center">
+                <i class="fas fa-exclamation-circle text-red-600 mr-2"></i>
+                <span class="text-red-800" th:text="${errorMessage}">Error message</span>
+            </div>
+        </div>
+
+        <!-- User Overview Card -->
+        <div class="mb-8 bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
+            <div class="p-6">
+                <div class="flex flex-col md:flex-row md:items-center">
+                    <div class="flex-shrink-0 mb-4 md:mb-0 md:mr-6">
+                        <div class="w-20 h-20 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-full flex items-center justify-center">
+                            <span class="text-2xl font-bold text-white" th:text="${user.firstName?.charAt(0) ?: 'U'}">U</span>
+                        </div>
+                    </div>
+                    <div class="flex-grow">
+                        <h3 class="text-xl font-semibold text-gray-900" th:text="${user.firstName + ' ' + user.lastName}">User Name</h3>
+                        <p class="text-gray-600 mt-1" th:text="${user.email ?: 'No email provided'}">user@example.com</p>
+                        <p class="text-gray-600" th:text="${user.phoneNumber}">+1234567890</p>
+                        <div class="mt-2 flex flex-wrap gap-2">
+                            <span th:each="role, iterStat : ${userRoles}" 
+                                  class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800" 
+                                  th:text="${role.name}">Role</span>
+                        </div>
+                    </div>
+                    <div class="mt-4 md:mt-0 md:text-right">
+                        <div class="mb-2">
+                            <span th:if="${user.enabled}" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                <i class="fas fa-check-circle mr-1"></i>Active
+                            </span>
+                            <span th:unless="${user.enabled}" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                <i class="fas fa-times-circle mr-1"></i>Inactive
+                            </span>
+                        </div>
+                        <p class="text-sm text-gray-500">
+                            Created: <span th:text="${#temporals.format(user.createdAt, 'MMM dd, yyyy')}">Jan 01, 2024</span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Edit User Form -->
+        <div class="max-w-4xl mx-auto">
+            <div class="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-200">
+                <div class="bg-gradient-to-r from-yellow-500 to-orange-600 px-6 py-4">
+                    <h2 class="text-xl font-semibold text-white flex items-center">
+                        <i class="fas fa-edit mr-2"></i>
+                        Update User Information
+                    </h2>
+                </div>
+                <div class="p-6">
+                    <form th:action="@{/admin/users/{id}/edit(id=${user.id})}" method="post" th:object="${user}" novalidate>
+                        <input type="hidden" th:field="*{id}">
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <!-- First Name -->
+                            <div>
+                                <label for="firstName" class="block text-sm font-medium text-gray-700 mb-2">
+                                    <i class="fas fa-user mr-1 text-yellow-600"></i>
+                                    First Name <span class="text-red-500">*</span>
+                                </label>
+                                <input type="text" 
+                                       th:field="*{firstName}" 
+                                       th:class="${#fields.hasErrors('firstName')} ? 'block w-full px-3 py-2 border border-red-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-red-500 focus:border-red-500' : 'block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-yellow-500 focus:border-yellow-500'"
+                                       id="firstName" 
+                                       placeholder="Enter first name" 
+                                       required>
+                                <div th:if="${#fields.hasErrors('firstName')}" class="mt-1 text-sm text-red-600">
+                                    <span th:errors="*{firstName}">First name error</span>
+                                </div>
+                            </div>
+
+                            <!-- Last Name -->
+                            <div>
+                                <label for="lastName" class="block text-sm font-medium text-gray-700 mb-2">
+                                    <i class="fas fa-user mr-1 text-yellow-600"></i>
+                                    Last Name <span class="text-red-500">*</span>
+                                </label>
+                                <input type="text" 
+                                       th:field="*{lastName}"
+                                       th:class="${#fields.hasErrors('lastName')} ? 'block w-full px-3 py-2 border border-red-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-red-500 focus:border-red-500' : 'block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-yellow-500 focus:border-yellow-500'"
+                                       id="lastName" 
+                                       placeholder="Enter last name" 
+                                       required>
+                                <div th:if="${#fields.hasErrors('lastName')}" class="mt-1 text-sm text-red-600">
+                                    <span th:errors="*{lastName}">Last name error</span>
+                                </div>
+                            </div>
+
+                            <!-- Email -->
+                            <div>
+                                <label for="email" class="block text-sm font-medium text-gray-700 mb-2">
+                                    <i class="fas fa-envelope mr-1 text-yellow-600"></i>
+                                    Email Address
+                                </label>
+                                <input type="email" 
+                                       th:field="*{email}"
+                                       th:class="${#fields.hasErrors('email')} ? 'block w-full px-3 py-2 border border-red-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-red-500 focus:border-red-500' : 'block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-yellow-500 focus:border-yellow-500'"
+                                       id="email" 
+                                       placeholder="Enter email address">
+                                <div th:if="${#fields.hasErrors('email')}" class="mt-1 text-sm text-red-600">
+                                    <span th:errors="*{email}">Email error</span>
+                                </div>
+                                <p class="mt-1 text-sm text-gray-500">Optional. Used for login if provided.</p>
+                            </div>
+
+                            <!-- Phone Number -->
+                            <div>
+                                <label for="phoneNumber" class="block text-sm font-medium text-gray-700 mb-2">
+                                    <i class="fas fa-phone mr-1 text-yellow-600"></i>
+                                    Phone Number <span class="text-red-500">*</span>
+                                </label>
+                                <input type="tel" 
+                                       th:field="*{phoneNumber}"
+                                       th:class="${#fields.hasErrors('phoneNumber')} ? 'block w-full px-3 py-2 border border-red-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-red-500 focus:border-red-500' : 'block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-yellow-500 focus:border-yellow-500'"
+                                       id="phoneNumber" 
+                                       placeholder="Enter phone number" 
+                                       required>
+                                <div th:if="${#fields.hasErrors('phoneNumber')}" class="mt-1 text-sm text-red-600">
+                                    <span th:errors="*{phoneNumber}">Phone number error</span>
+                                </div>
+                                <p class="mt-1 text-sm text-gray-500">Used for login. Must be unique.</p>
+                            </div>
+                        </div>
+
+                        <!-- Address -->
+                        <div class="mt-6">
+                            <label for="address" class="block text-sm font-medium text-gray-700 mb-2">
+                                <i class="fas fa-map-marker-alt mr-1 text-yellow-600"></i>
+                                Address
+                            </label>
+                            <textarea th:field="*{address}" 
+                                      id="address" 
+                                      rows="3" 
+                                      class="block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-yellow-500 focus:border-yellow-500" 
+                                      placeholder="Enter full address"></textarea>
+                            <div th:if="${#fields.hasErrors('address')}" class="mt-1 text-sm text-red-600">
+                                <span th:errors="*{address}">Address error</span>
+                            </div>
+                        </div>
+
+                        <!-- Roles -->
+                        <div class="mt-6">
+                            <div class="block text-sm font-medium text-gray-700 mb-3">
+                                <i class="fas fa-user-shield mr-1 text-yellow-600"></i>
+                                Assign Roles <span class="text-red-500">*</span>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                <div th:each="role : ${roles}">
+                                    <label th:for="${'role_' + role.id}" 
+                                           class="block p-4 border-2 border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition-all">
+                                        <div class="flex items-center">
+                                            <input type="checkbox" 
+                                                   th:value="${role.id}" 
+                                                   name="roleIds" 
+                                                   th:id="${'role_' + role.id}"
+                                                   th:checked="${userRoles.contains(role)}"
+                                                   class="h-4 w-4 text-yellow-600 focus:ring-yellow-500 border-gray-300 rounded mr-3">
+                                            <div>
+                                                <div class="font-medium text-gray-900" th:text="${role.name}">Role Name</div>
+                                                <div class="text-sm text-gray-500" th:text="${role.description}">Role description</div>
+                                            </div>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+                            <div th:if="${#fields.hasErrors('roles')}" class="mt-2 text-sm text-red-600">
+                                <span th:errors="*{roles}">Role error</span>
+                            </div>
+                        </div>
+
+                        <!-- Enabled Status -->
+                        <div class="mt-6">
+                            <div class="flex items-center">
+                                <input type="checkbox" 
+                                       th:field="*{enabled}" 
+                                       id="enabled" 
+                                       class="h-4 w-4 text-yellow-600 focus:ring-yellow-500 border-gray-300 rounded">
+                                <label for="enabled" class="ml-3 text-sm font-medium text-gray-700">
+                                    <i class="fas fa-toggle-on mr-1 text-yellow-600"></i>
+                                    User Account Enabled
+                                </label>
+                            </div>
+                            <p class="mt-1 text-sm text-gray-500 ml-7">Enable user account for login access.</p>
+                        </div>
+
+                        <!-- Form Actions -->
+                        <div class="mt-8 flex justify-end space-x-3">
+                            <a href="/admin/users" 
+                               class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 transition-colors">
+                                <i class="fas fa-times mr-2"></i>
+                                Cancel
+                            </a>
+                            <button type="submit" 
+                                    class="inline-flex items-center px-4 py-2 border border-transparent rounded-lg text-sm font-medium text-white bg-gradient-to-r from-yellow-500 to-orange-600 hover:from-yellow-600 hover:to-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 transition-all">
+                                <i class="fas fa-save mr-2"></i>
+                                Update User
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Password Reset Card -->
+        <div class="max-w-4xl mx-auto mt-8">
+            <div class="bg-white rounded-xl shadow-lg border border-yellow-200 overflow-hidden">
+                <div class="bg-yellow-50 px-6 py-4">
+                    <h3 class="text-lg font-medium text-yellow-800 flex items-center">
+                        <i class="fas fa-key mr-2"></i>
+                        Password Management
+                    </h3>
+                </div>
+                <div class="p-6">
+                    <p class="text-gray-600 mb-4">Reset the user's password to a temporary password. The user will need to change it on their next login.</p>
+                    <form th:action="@{/admin/users/{id}/reset-password(id=${user.id})}" method="post" class="space-y-4">
+                        <div>
+                            <label for="newPassword" class="block text-sm font-medium text-gray-700 mb-2">
+                                New Temporary Password
+                            </label>
+                            <input type="password" 
+                                   id="newPassword" 
+                                   name="newPassword" 
+                                   class="block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-yellow-500 focus:border-yellow-500" 
+                                   placeholder="Enter temporary password"
+                                   required>
+                            <p class="mt-1 text-sm text-gray-500">Enter a temporary password for the user.</p>
+                        </div>
+                        <div>
+                            <button type="submit" 
+                                    class="inline-flex items-center px-4 py-2 border border-yellow-300 rounded-lg text-sm font-medium text-yellow-700 bg-yellow-50 hover:bg-yellow-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 transition-colors"
+                                    onclick="return confirm('Are you sure you want to reset this user\'s password?')">
+                                <i class="fas fa-key mr-2"></i>
+                                Reset Password
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Form validation for the main edit form
+        document.querySelector('form[th\\:object="${user}"]').addEventListener('submit', function(e) {
+            const roles = document.querySelectorAll('input[name="roleIds"]:checked');
+            
+            if (roles.length === 0) {
+                e.preventDefault();
+                alert('Please select at least one role for the user.');
+            }
+        });
+
+        // Auto-hide alerts
+        setTimeout(function() {
+            const alerts = document.querySelectorAll('.bg-green-50, .bg-red-50');
+            alerts.forEach(alert => {
+                alert.style.transition = 'opacity 0.5s';
+                alert.style.opacity = '0';
+                setTimeout(() => alert.remove(), 500);
+            });
+        }, 5000);
+    </script>
+</body>
+</html>

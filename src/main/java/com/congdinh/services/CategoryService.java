@@ -161,4 +161,13 @@ public class CategoryService {
         List<Category> categories = categoryRepository.findCategoriesWithProducts();
         return CategoryMapper.toDTOList(categories);
     }
+    
+    /**
+     * Get total number of categories
+     * @return Total count of categories
+     */
+    @Transactional(readOnly = true)
+    public long getTotalCategoryCount() {
+        return categoryRepository.count();
+    }
 }

@@ -66,4 +66,13 @@ public interface ProductJPARepository extends JpaRepository<Product, Integer> {
     
     @Query("SELECT COUNT(p) FROM Product p WHERE p.category.id = :categoryId")
     long countByCategoryId(@Param("categoryId") Integer categoryId);
+    
+    // Statistics methods for dashboard
+    long countByUnitInStockGreaterThan(int stock);
+    
+    long countByUnitInStockLessThanEqual(int stock);
+    
+    long countByUnitInStock(int stock);
+    
+    List<Product> findByUnitInStockLessThanEqual(int stock);
 }

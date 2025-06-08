@@ -8,6 +8,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -50,6 +51,8 @@ public class AdminProductController {
     @GetMapping
     public String listProducts(
             @RequestParam(defaultValue = "") String search,
+            @RequestParam(defaultValue = "") String category,
+            @RequestParam(defaultValue = "") String status,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "name") String sortBy,
@@ -59,13 +62,23 @@ public class AdminProductController {
         try {
             Page<ProductDTO> productPage;
             
-            if (search.trim().isEmpty()) {
+            if (search.trim().isEmpty() && category.trim().isEmpty() && status.trim().isEmpty()) {
                 productPage = productService.findPaginatedProducts(page, size, sortBy, direction);
             } else {
-                productPage = productService.searchProductsByName(search, null, null, page, size, sortBy, direction);
+                productPage = productService.searchProductsByName(search, category, status, page, size, sortBy, direction);
             }
             
+            // Calculate stats for dashboard cards using new service methods
+            long totalProducts = productService.getTotalProductCount();
+            long activeProducts = productService.getActiveProductCount();
+            long lowStockProducts = productService.getLowStockProductCount();
+            long outOfStockProducts = productService.getOutOfStockProductCount();
+            
+            // Get categories for filter dropdown
+            List<CategoryDTO> categories = categoryService.findAllCategories();
+            
             model.addAttribute("products", productPage.getContent());
+            model.addAttribute(CATEGORIES_ATTR, categories);
             model.addAttribute("currentPage", page);
             model.addAttribute("totalPages", productPage.getTotalPages());
             model.addAttribute("totalElements", productPage.getTotalElements());
@@ -73,6 +86,15 @@ public class AdminProductController {
             model.addAttribute("sortBy", sortBy);
             model.addAttribute("direction", direction);
             model.addAttribute("search", search);
+            model.addAttribute("category", category);
+            model.addAttribute("status", status);
+            
+            // Stats for dashboard cards
+            model.addAttribute("totalProducts", totalProducts);
+            model.addAttribute("activeProducts", activeProducts);
+            model.addAttribute("lowStockProducts", lowStockProducts);
+            model.addAttribute("outOfStockProducts", outOfStockProducts);
+            
             model.addAttribute(TITLE_ATTR, "Admin - Product Management");
             
             return "admin/product/list";
@@ -83,9 +105,14 @@ public class AdminProductController {
             
             model.addAttribute(ERROR_MESSAGE_ATTR, "Error loading products. Please try again.");
             model.addAttribute("products", List.of());
+            model.addAttribute(CATEGORIES_ATTR, List.of());
             model.addAttribute("currentPage", 0);
             model.addAttribute("totalPages", 0);
             model.addAttribute("totalElements", 0);
+            model.addAttribute("totalProducts", 0);
+            model.addAttribute("activeProducts", 0);
+            model.addAttribute("lowStockProducts", 0);
+            model.addAttribute("outOfStockProducts", 0);
             model.addAttribute(TITLE_ATTR, "Admin - Product Management");
             
             return "admin/product/list";
@@ -151,8 +178,8 @@ public class AdminProductController {
     /**
      * Show form to edit an existing product
      */
-    @GetMapping("/edit")
-    public String showEditProductForm(@RequestParam("id") Integer productId, Model model, RedirectAttributes redirectAttributes) {
+    @GetMapping("/edit/{id}")
+    public String showEditProductForm(@PathVariable("id") Integer productId, Model model, RedirectAttributes redirectAttributes) {
         try {
             Optional<ProductDTO> productOpt = productService.findProductById(productId);
             
@@ -233,9 +260,9 @@ public class AdminProductController {
     /**
      * Delete a product
      */
-    @PostMapping("/delete")
+    @PostMapping("/delete/{id}")
     @ResponseBody
-    public String deleteProduct(@RequestParam("id") Integer productId) {
+    public String deleteProduct(@PathVariable("id") Integer productId) {
         try {
             // Check if product exists
             if (!productService.productExistsById(productId)) {

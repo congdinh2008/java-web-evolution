@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" 
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      layout:decorate="~{shared/layout/admin}">
+<head>
+    <title>Role Management</title>
+</head>
+<body>
+    <div layout:fragment="content">
+        <!-- Header -->
+        <div class="mb-8">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-900 flex items-center">
+                        <i class="fas fa-user-shield mr-3 text-purple-600"></i>
+                        Role Management
+                    </h1>
+                    <p class="mt-2 text-gray-600">Manage system roles and permissions</p>
+                </div>
+                <div class="mt-4 sm:mt-0">
+                    <a href="/admin/roles/create" 
+                       class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 border border-transparent rounded-lg font-medium text-white hover:from-purple-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-all shadow-lg">
+                        <i class="fas fa-plus mr-2"></i>
+                        Create New Role
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div class="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100">
+                <div class="bg-gradient-to-r from-purple-500 to-purple-600 px-6 py-4">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h3 class="text-lg font-semibold text-white">Total Roles</h3>
+                            <p class="text-2xl font-bold text-white" th:text="${totalRoles}">0</p>
+                        </div>
+                        <div class="text-purple-100">
+                            <i class="fas fa-user-shield text-3xl"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100">
+                <div class="bg-gradient-to-r from-green-500 to-green-600 px-6 py-4">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h3 class="text-lg font-semibold text-white">Active Roles</h3>
+                            <p class="text-2xl font-bold text-white" th:text="${totalRoles}">0</p>
+                        </div>
+                        <div class="text-green-100">
+                            <i class="fas fa-check-circle text-3xl"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100">
+                <div class="bg-gradient-to-r from-blue-500 to-blue-600 px-6 py-4">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h3 class="text-lg font-semibold text-white">Admin Roles</h3>
+                            <p class="text-2xl font-bold text-white">1</p>
+                        </div>
+                        <div class="text-blue-100">
+                            <i class="fas fa-crown text-3xl"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100">
+                <div class="bg-gradient-to-r from-yellow-500 to-orange-600 px-6 py-4">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h3 class="text-lg font-semibold text-white">User Roles</h3>
+                            <p class="text-2xl font-bold text-white" th:text="${totalRoles - 1}">0</p>
+                        </div>
+                        <div class="text-yellow-100">
+                            <i class="fas fa-users text-3xl"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Alert Messages -->
+        <div th:if="${successMessage}" class="mb-6 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg flex items-center">
+            <i class="fas fa-check-circle mr-3 text-green-500"></i>
+            <span th:text="${successMessage}">Success message</span>
+        </div>
+
+        <div th:if="${errorMessage}" class="mb-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg flex items-center">
+            <i class="fas fa-exclamation-circle mr-3 text-red-500"></i>
+            <span th:text="${errorMessage}">Error message</span>
+        </div>
+
+        <!-- Search -->
+        <div class="bg-white rounded-xl shadow-lg p-6 mb-8 border border-gray-100">
+            <form method="get" th:action="@{/admin/roles}">
+                <div class="flex flex-col sm:flex-row gap-4">
+                    <div class="flex-1">
+                        <div class="relative">
+                            <input type="text" name="search" 
+                                   th:value="${param.search}" 
+                                   placeholder="Search roles by name or description..."
+                                   class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <i class="fas fa-search text-gray-400"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex gap-2">
+                        <button type="submit" 
+                                class="px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-colors font-medium">
+                            <i class="fas fa-search mr-2"></i>Search
+                        </button>
+                        <a href="/admin/roles" 
+                           class="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors font-medium">
+                            Clear
+                        </a>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- Roles Grid -->
+        <div th:if="${roles.empty}" class="text-center py-16">
+            <div class="mx-auto w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-6">
+                <i class="fas fa-user-shield text-3xl text-gray-400"></i>
+            </div>
+            <h3 class="text-xl font-semibold text-gray-900 mb-2">No roles found</h3>
+            <p class="text-gray-600 mb-6">Create your first role to get started with role management</p>
+            <a href="/admin/roles/create" 
+               class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 border border-transparent rounded-lg font-medium text-white hover:from-purple-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-all shadow-lg">
+                <i class="fas fa-plus mr-2"></i>Create Role
+            </a>
+        </div>
+
+        <div th:unless="${roles.empty}" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div th:each="role : ${roles.content}" class="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100 hover:shadow-xl transition-shadow duration-300">
+                <div class="p-6">
+                    <div class="text-center mb-4">
+                        <div class="w-16 h-16 mx-auto bg-gradient-to-r from-purple-500 to-indigo-600 rounded-full flex items-center justify-center mb-4">
+                            <i class="fas fa-user-shield text-2xl text-white"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-900 mb-2" th:text="${role.name}">Role Name</h3>
+                        <p class="text-gray-600 text-sm" th:text="${role.description}">Role description</p>
+                    </div>
+                    
+                    <!-- Role Stats -->
+                    <div class="grid grid-cols-2 gap-4 mb-6">
+                        <div class="text-center bg-blue-50 rounded-lg p-3">
+                            <div class="text-blue-600 mb-1">
+                                <i class="fas fa-users text-lg"></i>
+                            </div>
+                            <div class="text-xs text-blue-600 font-medium">Users</div>
+                            <div class="text-lg font-bold text-blue-700" th:text="${role.users.size()}">0</div>
+                        </div>
+                        <div class="text-center bg-green-50 rounded-lg p-3">
+                            <div class="text-green-600 mb-1">
+                                <i class="fas fa-calendar text-lg"></i>
+                            </div>
+                            <div class="text-xs text-green-600 font-medium">Created</div>
+                            <div class="text-lg font-bold text-green-700" th:text="${#temporals.format(role.createdAt, 'MMM yyyy')}">Jan 2024</div>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="grid grid-cols-4 gap-2">
+                        <a th:href="@{/admin/roles/{id}(id=${role.id})}" 
+                           title="View Role"
+                           class="flex items-center justify-center p-2 border border-blue-300 text-blue-600 rounded-lg hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors">
+                            <i class="fas fa-eye"></i>
+                        </a>
+                        <a th:href="@{/admin/roles/{id}/edit(id=${role.id})}" 
+                           title="Edit Role"
+                           class="flex items-center justify-center p-2 border border-yellow-300 text-yellow-600 rounded-lg hover:bg-yellow-50 focus:outline-none focus:ring-2 focus:ring-yellow-500 transition-colors">
+                            <i class="fas fa-edit"></i>
+                        </a>
+                        <a th:href="@{/admin/roles/{id}/users(id=${role.id})}" 
+                           title="View Users"
+                           class="flex items-center justify-center p-2 border border-purple-300 text-purple-600 rounded-lg hover:bg-purple-50 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-colors">
+                            <i class="fas fa-users"></i>
+                        </a>
+                        <button type="button" 
+                                title="Delete Role"
+                                class="delete-role-btn"
+                                th:data-role-id="${role.id}"
+                                th:data-role-name="${role.name}"
+                                th:disabled="${role.users.size() > 0}"
+                                th:class="${role.users.size() > 0} ? 'flex items-center justify-center p-2 border border-gray-300 text-gray-400 rounded-lg cursor-not-allowed' : 'flex items-center justify-center p-2 border border-red-300 text-red-600 rounded-lg hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-500 transition-colors'">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                    
+                    <!-- Warning for roles with users -->
+                    <div th:if="${role.users.size() > 0}" class="mt-3 p-2 bg-yellow-50 border border-yellow-200 rounded-lg">
+                        <div class="flex items-center text-yellow-700 text-xs">
+                            <i class="fas fa-exclamation-triangle mr-2"></i>
+                            <span>Cannot delete - has assigned users</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pagination -->
+        <nav th:if="${roles.totalPages > 1}" class="mt-8" aria-label="Role pagination">
+            <div class="flex items-center justify-between">
+                <div class="flex-1 flex justify-between sm:hidden">
+                    <a th:href="@{/admin/roles(page=${roles.number - 1}, size=${roles.size}, search=${param.search})}"
+                       th:class="${roles.first} ? 'relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-400 bg-gray-100 cursor-not-allowed' : 'relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50'">
+                        Previous
+                    </a>
+                    <a th:href="@{/admin/roles(page=${roles.number + 1}, size=${roles.size}, search=${param.search})}"
+                       th:class="${roles.last} ? 'ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-400 bg-gray-100 cursor-not-allowed' : 'ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50'">
+                        Next
+                    </a>
+                </div>
+                <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+                    <div>
+                        <p class="text-sm text-gray-700">
+                            Showing page <span class="font-medium" th:text="${roles.number + 1}">1</span> of <span class="font-medium" th:text="${roles.totalPages}">1</span>
+                        </p>
+                    </div>
+                    <div>
+                        <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px">
+                            <a th:href="@{/admin/roles(page=${roles.number - 1}, size=${roles.size}, search=${param.search})}"
+                               th:class="${roles.first} ? 'relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-gray-100 text-sm font-medium text-gray-400 cursor-not-allowed' : 'relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50'">
+                                <i class="fas fa-chevron-left"></i>
+                            </a>
+                            
+                            <a th:each="i : ${#numbers.sequence(0, roles.totalPages - 1)}"
+                               th:href="@{/admin/roles(page=${i}, size=${roles.size}, search=${param.search})}"
+                               th:class="${i == roles.number} ? 'relative inline-flex items-center px-4 py-2 border border-purple-500 bg-purple-600 text-sm font-medium text-white' : 'relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50'"
+                               th:text="${i + 1}">1</a>
+                            
+                            <a th:href="@{/admin/roles(page=${roles.number + 1}, size=${roles.size}, search=${param.search})}"
+                               th:class="${roles.last} ? 'relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-gray-100 text-sm font-medium text-gray-400 cursor-not-allowed' : 'relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50'">
+                                <i class="fas fa-chevron-right"></i>
+                            </a>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Delete Confirmation Modal -->
+        <div id="deleteModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
+            <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+                <div class="mt-3">
+                    <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 mb-4">
+                        <i class="fas fa-exclamation-triangle text-red-600 text-xl"></i>
+                    </div>
+                    <div class="text-center">
+                        <h3 class="text-lg font-medium text-gray-900 mb-2">Confirm Delete</h3>
+                        <p class="text-sm text-gray-500 mb-4">
+                            Are you sure you want to delete the role <strong id="roleNameToDelete"></strong>?
+                        </p>
+                        <p class="text-sm text-red-600 mb-6">
+                            <i class="fas fa-exclamation-triangle mr-1"></i>
+                            This action cannot be undone.
+                        </p>
+                        <div class="flex justify-center space-x-4">
+                            <button type="button" onclick="closeDeleteModal()"
+                                    class="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-colors">
+                                Cancel
+                            </button>
+                            <form id="deleteForm" method="post" class="inline">
+                                <button type="submit" 
+                                        class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 transition-colors">
+                                    <i class="fas fa-trash mr-2"></i>Delete Role
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script layout:fragment="scripts">
+        // Add event listeners to delete buttons
+        document.querySelectorAll('.delete-role-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                if (!this.disabled) {
+                    const roleId = this.dataset.roleId;
+                    const roleName = this.dataset.roleName;
+                    deleteRole(roleId, roleName);
+                }
+            });
+        });
+
+        // Delete role function
+        function deleteRole(roleId, roleName) {
+            document.getElementById('roleNameToDelete').textContent = roleName;
+            document.getElementById('deleteForm').action = '/admin/roles/' + roleId + '/delete';
+            document.getElementById('deleteModal').classList.remove('hidden');
+        }
+
+        // Close delete modal
+        function closeDeleteModal() {
+            document.getElementById('deleteModal').classList.add('hidden');
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('deleteModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeDeleteModal();
+            }
+        });
+    </script>
+</body>
+</html>

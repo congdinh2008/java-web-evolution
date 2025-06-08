@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 public class HomeController {
     
     /**
-     * Home page
+     * Alternative home page route (main "/" route handled by AuthController)
      */
     @GetMapping("/")
     public String homePage(Model model) {
