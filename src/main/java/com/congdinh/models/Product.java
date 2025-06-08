@@ -6,6 +6,9 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.FetchType;
 
 /**
  * Product entity class with JPA annotations
@@ -29,6 +32,10 @@ public class Product {
     @Column(name = "ThumbnailUrl", nullable = false)
     private String thumbnailUrl;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "category_id")
+    private Category category;
+
     // Constructors
     public Product() {
     }
@@ -39,6 +46,15 @@ public class Product {
         this.unitPrice = unitPrice;
         this.unitInStock = unitInStock;
         this.thumbnailUrl = thumbnailUrl;
+    }
+
+    public Product(int id, String name, double unitPrice, int unitInStock, String thumbnailUrl, Category category) {
+        this.id = id;
+        this.name = name;
+        this.unitPrice = unitPrice;
+        this.unitInStock = unitInStock;
+        this.thumbnailUrl = thumbnailUrl;
+        this.category = category;
     }
 
     // Getters and Setters
@@ -82,6 +98,14 @@ public class Product {
         this.thumbnailUrl = thumbnailUrl;
     }
 
+    public Category getCategory() {
+        return category;
+    }
+
+    public void setCategory(Category category) {
+        this.category = category;
+    }
+
     @Override
     public String toString() {
         return "Product{" +
@@ -90,6 +114,7 @@ public class Product {
                 ", unitPrice=" + unitPrice +
                 ", unitInStock=" + unitInStock +
                 ", thumbnailUrl='" + thumbnailUrl + '\'' +
+                ", category=" + (category != null ? category.getName() : "null") +
                 '}';
     }
 }

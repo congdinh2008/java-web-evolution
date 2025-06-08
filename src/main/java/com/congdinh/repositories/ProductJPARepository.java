@@ -11,6 +11,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.congdinh.models.Product;
+import com.congdinh.models.Category;
 
 /**
  * Spring Data JPA repository for Product entity
@@ -32,6 +33,20 @@ public interface ProductJPARepository extends JpaRepository<Product, Integer> {
     
     Optional<Product> findByName(String name);
     
+    // Category-based queries
+    List<Product> findByCategory(Category category);
+    
+    Page<Product> findByCategory(Category category, Pageable pageable);
+    
+    List<Product> findByCategoryId(Integer categoryId);
+    
+    Page<Product> findByCategoryId(Integer categoryId, Pageable pageable);
+    
+    // Combined search queries
+    List<Product> findByNameContainingIgnoreCaseAndCategory(String name, Category category);
+    
+    Page<Product> findByNameContainingIgnoreCaseAndCategory(String name, Category category, Pageable pageable);
+    
     // Pagination and sorting are handled by Spring Data JPA
     Page<Product> findAll(Pageable pageable);
     
@@ -44,4 +59,11 @@ public interface ProductJPARepository extends JpaRepository<Product, Integer> {
     // Native SQL query example
     @Query(value = "SELECT * FROM Products WHERE UnitInStock > 0 ORDER BY UnitPrice ASC LIMIT :limit", nativeQuery = true)
     List<Product> findInStockProductsOrderByPriceAsc(@Param("limit") int limit);
+    
+    // Category-related counts
+    @Query("SELECT COUNT(p) FROM Product p WHERE p.category = :category")
+    long countByCategory(@Param("category") Category category);
+    
+    @Query("SELECT COUNT(p) FROM Product p WHERE p.category.id = :categoryId")
+    long countByCategoryId(@Param("categoryId") Integer categoryId);
 }

@@ -11,6 +11,10 @@ import java.util.stream.Collectors;
  */
 public class ProductMapper {
     
+    private ProductMapper() {
+        // Private constructor to prevent instantiation
+    }
+    
     /**
      * Convert Product entity to ProductDTO
      * @param product Product entity
@@ -26,7 +30,8 @@ public class ProductMapper {
             product.getName(),
             product.getUnitPrice(),
             product.getUnitInStock(),
-            product.getThumbnailUrl()
+            product.getThumbnailUrl(),
+            product.getCategory() != null ? CategoryMapper.toDTO(product.getCategory()) : null
         );
     }
     
@@ -46,6 +51,9 @@ public class ProductMapper {
         product.setUnitPrice(productDTO.getUnitPrice());
         product.setUnitInStock(productDTO.getUnitInStock());
         product.setThumbnailUrl(productDTO.getThumbnailUrl());
+        if (productDTO.getCategory() != null) {
+            product.setCategory(CategoryMapper.toEntity(productDTO.getCategory()));
+        }
         
         return product;
     }

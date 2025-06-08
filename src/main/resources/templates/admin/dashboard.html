@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{shared/layout/layout}">
+<head>
+    <title th:text="${title}">ViVu Store - Admin Dashboard</title>
+</head>
+<body>
+    <div layout:fragment="content">
+        <!-- Page Header -->
+        <section class="bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-12">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center">
+                    <h1 class="text-4xl font-bold mb-4">Admin Dashboard</h1>
+                    <p class="text-lg text-indigo-100 max-w-2xl mx-auto">Manage your store's products and categories</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Dashboard Statistics -->
+        <section class="py-8 bg-gray-50">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <!-- Total Products -->
+                    <div class="bg-white rounded-lg shadow-md p-6">
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0">
+                                <div class="bg-blue-100 p-3 rounded-lg">
+                                    <svg class="h-8 w-8 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                                    </svg>
+                                </div>
+                            </div>
+                            <div class="ml-4">
+                                <p class="text-sm font-medium text-gray-500">Total Products</p>
+                                <p class="text-2xl font-semibold text-gray-900" th:text="${totalProducts}">0</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Total Categories -->
+                    <div class="bg-white rounded-lg shadow-md p-6">
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0">
+                                <div class="bg-green-100 p-3 rounded-lg">
+                                    <svg class="h-8 w-8 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+                                    </svg>
+                                </div>
+                            </div>
+                            <div class="ml-4">
+                                <p class="text-sm font-medium text-gray-500">Total Categories</p>
+                                <p class="text-2xl font-semibold text-gray-900" th:text="${totalCategories}">0</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Low Stock Alert -->
+                    <div class="bg-white rounded-lg shadow-md p-6">
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0">
+                                <div class="bg-red-100 p-3 rounded-lg">
+                                    <svg class="h-8 w-8 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"/>
+                                    </svg>
+                                </div>
+                            </div>
+                            <div class="ml-4">
+                                <p class="text-sm font-medium text-gray-500">Low Stock Products</p>
+                                <p class="text-2xl font-semibold text-gray-900" th:text="${lowStockProducts}">0</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Quick Actions -->
+        <section class="py-12 bg-white">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-8">
+                    <h2 class="text-3xl font-bold text-gray-900 mb-4">Quick Actions</h2>
+                    <p class="text-lg text-gray-600">Manage your store content efficiently</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <!-- Add New Product -->
+                    <div class="bg-white rounded-lg shadow-md border-2 border-gray-200 hover:border-indigo-500 transition-colors duration-200">
+                        <a th:href="@{/admin/products/add}" class="block p-6 text-center">
+                            <div class="bg-indigo-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <svg class="h-8 w-8 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                                </svg>
+                            </div>
+                            <h3 class="text-lg font-semibold text-gray-900 mb-2">Add Product</h3>
+                            <p class="text-gray-600">Create a new product for your store</p>
+                        </a>
+                    </div>
+
+                    <!-- Add New Category -->
+                    <div class="bg-white rounded-lg shadow-md border-2 border-gray-200 hover:border-green-500 transition-colors duration-200">
+                        <a th:href="@{/admin/categories/add}" class="block p-6 text-center">
+                            <div class="bg-green-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <svg class="h-8 w-8 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
+                                </svg>
+                            </div>
+                            <h3 class="text-lg font-semibold text-gray-900 mb-2">Add Category</h3>
+                            <p class="text-gray-600">Create a new product category</p>
+                        </a>
+                    </div>
+
+                    <!-- Manage Products -->
+                    <div class="bg-white rounded-lg shadow-md border-2 border-gray-200 hover:border-blue-500 transition-colors duration-200">
+                        <a th:href="@{/admin/products}" class="block p-6 text-center">
+                            <div class="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <svg class="h-8 w-8 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                                </svg>
+                            </div>
+                            <h3 class="text-lg font-semibold text-gray-900 mb-2">Manage Products</h3>
+                            <p class="text-gray-600">View, edit, and delete products</p>
+                        </a>
+                    </div>
+
+                    <!-- Manage Categories -->
+                    <div class="bg-white rounded-lg shadow-md border-2 border-gray-200 hover:border-purple-500 transition-colors duration-200">
+                        <a th:href="@{/admin/categories}" class="block p-6 text-center">
+                            <div class="bg-purple-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <svg class="h-8 w-8 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+                                </svg>
+                            </div>
+                            <h3 class="text-lg font-semibold text-gray-900 mb-2">Manage Categories</h3>
+                            <p class="text-gray-600">View, edit, and delete categories</p>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Recent Activity / Low Stock Alert -->
+        <section class="py-12 bg-gray-50" th:if="${lowStockProducts > 0}">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="bg-red-50 border border-red-200 rounded-lg p-6">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                            <svg class="h-8 w-8 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"/>
+                            </svg>
+                        </div>
+                        <div class="ml-4 flex-1">
+                            <h3 class="text-lg font-semibold text-red-800">Low Stock Alert!</h3>
+                            <p class="text-red-700">
+                                You have <span th:text="${lowStockProducts}">0</span> product(s) with low stock (5 or fewer items remaining).
+                                <a th:href="@{/admin/products?lowStock=true}" class="font-medium underline hover:no-underline">
+                                    View products →
+                                </a>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Error Message -->
+        <section th:if="${errorMessage}" class="py-8 bg-white">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="bg-red-50 border border-red-200 rounded-lg p-6">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                            <svg class="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                        </div>
+                        <div class="ml-3">
+                            <p class="text-red-800 font-medium" th:text="${errorMessage}">Error loading dashboard data</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Help Section -->
+        <section class="py-12 bg-white border-t border-gray-200">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center">
+                    <h2 class="text-2xl font-bold text-gray-900 mb-4">Need Help?</h2>
+                    <p class="text-gray-600 mb-6">Get started with these helpful resources</p>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <!-- Getting Started -->
+                        <div class="bg-gray-50 rounded-lg p-6">
+                            <div class="bg-indigo-100 w-12 h-12 rounded-lg flex items-center justify-center mx-auto mb-4">
+                                <svg class="h-6 w-6 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+                                </svg>
+                            </div>
+                            <h3 class="text-lg font-semibold text-gray-900 mb-2">Getting Started</h3>
+                            <p class="text-gray-600 text-sm">Learn how to add your first products and categories</p>
+                        </div>
+
+                        <!-- Best Practices -->
+                        <div class="bg-gray-50 rounded-lg p-6">
+                            <div class="bg-green-100 w-12 h-12 rounded-lg flex items-center justify-center mx-auto mb-4">
+                                <svg class="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                            </div>
+                            <h3 class="text-lg font-semibold text-gray-900 mb-2">Best Practices</h3>
+                            <p class="text-gray-600 text-sm">Tips for managing inventory and product descriptions</p>
+                        </div>
+
+                        <!-- Support -->
+                        <div class="bg-gray-50 rounded-lg p-6">
+                            <div class="bg-purple-100 w-12 h-12 rounded-lg flex items-center justify-center mx-auto mb-4">
+                                <svg class="h-6 w-6 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192L5.636 18.364M12 12h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                            </div>
+                            <h3 class="text-lg font-semibold text-gray-900 mb-2">Support</h3>
+                            <p class="text-gray-600 text-sm">Contact our support team for assistance</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+</body>
+</html>

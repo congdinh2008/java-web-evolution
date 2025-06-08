@@ -10,6 +10,8 @@ public class ProductDTO {
     private double unitPrice;
     private int unitInStock;
     private String thumbnailUrl;
+    private CategoryDTO category;
+    private Integer categoryId; // For form binding
 
     // Constructors
     public ProductDTO() {
@@ -21,6 +23,16 @@ public class ProductDTO {
         this.unitPrice = unitPrice;
         this.unitInStock = unitInStock;
         this.thumbnailUrl = thumbnailUrl;
+    }
+
+    public ProductDTO(int id, String name, double unitPrice, int unitInStock, String thumbnailUrl, CategoryDTO category) {
+        this.id = id;
+        this.name = name;
+        this.unitPrice = unitPrice;
+        this.unitInStock = unitInStock;
+        this.thumbnailUrl = thumbnailUrl;
+        this.category = category;
+        this.categoryId = category != null ? category.getId() : null;
     }
 
     // Getters and Setters
@@ -62,6 +74,23 @@ public class ProductDTO {
 
     public void setThumbnailUrl(String thumbnailUrl) {
         this.thumbnailUrl = thumbnailUrl;
+    }
+
+    public CategoryDTO getCategory() {
+        return category;
+    }
+
+    public void setCategory(CategoryDTO category) {
+        this.category = category;
+        this.categoryId = category != null ? category.getId() : null;
+    }
+
+    public Integer getCategoryId() {
+        return categoryId;
+    }
+
+    public void setCategoryId(Integer categoryId) {
+        this.categoryId = categoryId;
     }
 
     @Override
